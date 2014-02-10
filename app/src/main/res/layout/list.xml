@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="0dp"
+    android:weightSum="1"
+    android:background="@drawable/border">
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:textSize="20sp"
+    android:id="@+id/tweet"
+    android:minHeight="150dip"
+    android:maxHeight="130dip"
+    android:layout_toRightOf="@+id/screename_thumb"
+    android:text="tweet test"
+    android:layout_below="@+id/screename">
+</TextView>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="200dip"
+android:layout_height="20dp"
+    android:textSize="10dip"
+android:id="@+id/screename"
+    android:textColor="#5d5d5d"
+    android:layout_alignParentTop="true"
+    android:layout_toRightOf="@+id/screename_thumb"
+    android:text="screename"
+    android:layout_marginTop="5dip">
+</TextView>
+
+    <ImageView
+        android:id="@+id/screename_thumb"
+        android:layout_width="85dip"
+        android:layout_height="85dip"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="5dip" />
+
+    <TextView
+        android:id="@+id/created"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/tweet"
+        android:layout_alignEnd="@+id/tweet" />
+</RelativeLayout>

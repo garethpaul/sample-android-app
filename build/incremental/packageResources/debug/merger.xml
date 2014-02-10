@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="/Users/gjones/AndroidStudioProjects/MyApplication2/app/libs/mopub/res" />
+        <source path="/Users/gjones/AndroidStudioProjects/MyApplication2/build/res/rs/debug" />
+        <source path="/Users/gjones/AndroidStudioProjects/MyApplication2/build/res/generated/debug" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/Users/gjones/AndroidStudioProjects/MyApplication2/src/debug/res" />
+    </dataSet>
+
+</merger>

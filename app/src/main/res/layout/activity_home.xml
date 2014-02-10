@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <ImageView
+        android:id="@+id/menu"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:background="#c0392b"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Wow welcome!"
+        android:id="@+id/name"
+        android:layout_below="@+id/menu"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:contentDescription="@string/hello"
+        android:maxHeight="70dp"
+        android:maxWidth="70dp"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/logout"
+        android:layout_marginTop="12dip"
+        android:layout_marginRight="5dip" />
+
+    <ImageView
+        android:id="@+id/logout"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:contentDescription="@string/hello"
+        android:src="@drawable/logout"
+        android:paddingRight="5dip"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="8dip" />
+
+    <ImageView
+        android:id="@+id/icon_menu"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:contentDescription="@string/hello"
+        android:src="@drawable/icon_menu"
+        android:paddingRight="5dip"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/imageView"
+        android:layout_alignRight="@+id/name"
+        android:layout_alignEnd="@+id/name" />
+
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/textView"
+        android:layout_below="@+id/menu"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:minHeight="60dip"
+        android:textAlignment="center"
+        android:singleLine="true"
+        android:capitalize="words"
+        android:background="#7f8c8d"
+        android:textColor="#f9f9f9"
+        android:gravity="center" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_marginTop="182dp"
+        android:layout_below="@+id/textView"
+        android:layout_alignRight="@+id/icon_menu"
+        android:layout_alignEnd="@+id/icon_menu"
+        android:visibility="invisible" />
+
+    <ImageView
+        android:layout_width="60dip"
+        android:layout_height="60dip"
+        android:id="@+id/imageView2"
+        android:src="@drawable/home"
+        android:layout_above="@+id/listView"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:id="@+id/refresh"
+        android:src="@drawable/refresh"
+        android:layout_below="@+id/menu"
+        android:layout_alignLeft="@+id/logout"
+        android:layout_alignStart="@+id/logout"
+        android:layout_marginTop="14dip" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loading"
+        android:id="@+id/loading"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/logout"
+        android:layout_alignEnd="@+id/logout"
+        android:layout_alignParentBottom="true"
+        android:capitalize="words"
+        android:background="#7f8c8d"
+        android:textColor="#f9f9f9"
+        android:minHeight="50dip"
+        android:gravity="center"
+        android:visibility="invisible" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView" />
+
+    <com.mopub.mobileads.MoPubView
+            android:id="@+id/adview"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"/>
+
+
+</RelativeLayout>

@@ -1,0 +1,104 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:adjustViewBounds="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/bg"
+        android:clickable="true"/>
+
+
+
+    <ImageButton
+        android:id="@+id/btnLoginTwitter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/login"
+        android:background="@null"
+        android:baselineAlignBottom="true"
+        android:layout_marginLeft="30dp"
+        android:layout_alignTop="@+id/btnSignUp"
+        android:layout_toRightOf="@+id/lblUpdate"
+        android:layout_marginBottom="19dp" />
+
+    <ImageButton
+        android:id="@+id/btnSignUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/signup"
+        android:background="@null"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/lblUserName"
+        android:layout_alignStart="@+id/lblUserName"
+        android:layout_marginBottom="19dp"
+        android:layout_marginLeft="15dp" />
+
+    <!-- user name label -->
+    <TextView android:id="@+id/lblUserName"
+        android:layout_width="fill_parent"
+        android:layout_height="53dip"
+        android:padding="30dip"
+        android:layout_below="@+id/btnSignUp"
+        android:layout_toRightOf="@+id/btnLoginTwitter" />
+
+    <!-- label update status -->
+    <TextView android:id="@+id/lblUpdate"
+        android:text="Update Status"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:visibility="gone"/>
+
+    <!-- Tweet EditText -->
+    <EditText android:id="@+id/txtUpdateStatus"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dip"
+        android:visibility="gone"/>
+
+    <!-- Tweet Button -->
+    <Button android:id="@+id/btnUpdateStatus"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Tweet"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:visibility="gone"/>
+
+    <!-- Twitter Logout button -->
+    <Button android:id="@+id/btnLogoutTwitter"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Logout from Twitter"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:layout_marginTop="50dip"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:src="@drawable/logo_text"
+        android:layout_alignTop="@+id/adview"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <com.mopub.mobileads.MoPubView
+        android:id="@+id/adview"
+        android:layout_width="fill_parent"
+        android:layout_height="250dp"
+        android:layout_below="@+id/lblUpdate"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+</RelativeLayout>
