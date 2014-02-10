@@ -14,5 +14,10 @@ Currently the app broadly implements
 
 Here are some images of the application:
 
+#### LoginScreen (MainActivity)
+
 ![alt tag](https://raw.github.com/garethpaul/sample-android-app/master/ref/screenshot.png)
+
+### HomeScreen (HomeActivity)
+
 ![alt tag](https://raw.github.com/garethpaul/sample-android-app/master/ref/screenshot_2.png)
