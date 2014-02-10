@@ -1,7 +1,7 @@
 sample-android-app
 ==================
 
-This is a sample android application. All work is my own and is not representative of something that should be used in production :-)
+This is a sample android application. Important - This code isn't particularly clean or well structured. All work is my own and is not representative of something that should be used in production :-)
 
 Currently the app broadly implements
 
