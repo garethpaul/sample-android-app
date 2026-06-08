@@ -57,7 +57,8 @@ secrets.
 
 - `./gradlew test` or Android Studio's test runner when the SDK is configured
 - `make verify` runs static checks for wrapper safety, ignored build outputs,
-  local credential templates, and hardcoded ad-unit values. Set
+  local credential templates, hardcoded ad-unit values, and observable
+  stream-copy error handling. Set
   `RUN_LEGACY_GRADLE=1` to attempt the legacy Gradle build on a compatible
   Android SDK.
 
@@ -69,7 +70,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 ## Security and Privacy Notes
 
-- Review changes touching authentication or token handling; examples from the scan include app/src/main/AndroidManifest.xml, app/src/main/java/com/example/app/Const_Example.java, app/src/main/java/com/example/app/HomeActivity.java, app/src/main/java/com/example/app/MainActivity.java, and 1 more.
+- Review changes touching authentication or token handling; examples from the scan include app/src/main/AndroidManifest.xml, app/src/main/java/com/example/app/Const.java.example, app/src/main/java/com/example/app/HomeActivity.java, app/src/main/java/com/example/app/MainActivity.java, and 1 more.
 - Review changes touching external API calls or credential-adjacent configuration; examples from the scan include app/src/main/java/com/example/app/HomeActivity.java, app/src/main/java/com/example/app/MainActivity.java, app/src/main/res/layout/activity_main.xml.
 - Review changes touching network requests, sockets, or service endpoints; examples from the scan include app/proguard-rules.txt, app/src/main/AndroidManifest.xml, app/src/main/java/com/example/app/MainActivity.java, app/src/main/res/drawable-hdpi/border.xml, and 6 more.
 - Review changes touching mobile permissions or privacy-sensitive device data; examples from the scan include app/src/main/AndroidManifest.xml, gradlew.

@@ -63,6 +63,22 @@ Dir['app/src/main/java/**/*.java'].each do |path|
   end
 end
 
+utils_path = 'app/src/main/java/com/example/app/Utils.java'
+if File.exist?(utils_path)
+  utils_source = File.read(utils_path)
+  if utils_source.match?(/catch\s*\(\s*Exception\b/)
+    failures << "#{utils_path} must not swallow broad Exception failures"
+  end
+  unless utils_source.match?(/catch\s*\(\s*IOException\b/)
+    failures << "#{utils_path} must catch IOException for stream-copy failures"
+  end
+  unless utils_source.include?('Log.e(TAG, "Failed to copy stream", ex);')
+    failures << "#{utils_path} must log stream-copy IOException failures"
+  end
+else
+  failures << "#{utils_path} is missing"
+end
+
 if failures.empty?
   puts 'Android sample contract checks passed'
 else

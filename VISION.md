@@ -15,6 +15,7 @@ Priority:
 
 - Preserve the login and home-screen sample flow
 - Keep Twitter and ad-network credentials out of source control
+- Keep helper failures observable during static verification
 - Maintain screenshot references for visual context
 - Treat the Android project structure and dependencies as legacy
 

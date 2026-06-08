@@ -1,9 +1,14 @@
 package com.example.app;
 
+import android.util.Log;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class Utils {
+    private static final String TAG = Utils.class.getSimpleName();
+
     public static void CopyStream(InputStream is, OutputStream os)
     {
         final int buffer_size=1024;
@@ -18,6 +23,9 @@ public class Utils {
                 os.write(bytes, 0, count);
             }
         }
-        catch(Exception ex){}
+        catch(IOException ex)
+        {
+            Log.e(TAG, "Failed to copy stream", ex);
+        }
     }
 }

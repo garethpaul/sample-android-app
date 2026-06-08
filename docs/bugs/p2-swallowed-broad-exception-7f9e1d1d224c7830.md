@@ -1,4 +1,8 @@
-# [P2] Handle broad exception paths instead of swallowing failures
+# [P2][Resolved] Handle broad exception paths instead of swallowing failures
+
+## Status
+
+Resolved
 
 ## Severity
 
@@ -15,6 +19,12 @@ A broad exception handler drops all failures and returns control without logging
 ## Suggested fix
 
 Catch the narrow exception types expected in this path, log or return a structured error, and update callers to handle the failure explicitly.
+
+## Resolution
+
+`Utils.CopyStream` now catches only `IOException` and writes failures to Android
+error logging. The static Android contract checker rejects a broad
+`catch (Exception)` in the helper and requires the stream-copy failure log call.
 
 ## Review metadata
 

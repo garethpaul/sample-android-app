@@ -2,6 +2,10 @@
 
 ## 2026-06-08
 
+- Narrowed `Utils.CopyStream` failure handling to `IOException` and added
+  Android error logging so stream-copy failures are observable.
+- Extended the Android contract checker to reject broad swallowed exceptions in
+  the stream-copy helper.
 - Added a static Android contract check for wrapper safety, generated build
   outputs, local credential templates, and hardcoded ad-unit values.
 - Replaced the compiled `Const_Example.java` placeholder with a copyable ignored
