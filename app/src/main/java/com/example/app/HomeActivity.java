@@ -110,7 +110,7 @@ public class HomeActivity extends Activity {
         // get mo money
         // get paid
         moPubView = (MoPubView) findViewById(R.id.adview);
-        moPubView.setAdUnitId("9bfd238f7c7a41f686a8a6bece90890a");
+        moPubView.setAdUnitId(Const.MoPubMiniBannerId);
         moPubView.loadAd();
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);

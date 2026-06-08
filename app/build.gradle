@@ -2,7 +2,7 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion '19.0.0'
+    buildToolsVersion '19.1.0'
 
     defaultConfig {
         minSdkVersion 7
@@ -19,10 +19,8 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support:appcompat-v7:19.0.1'
     compile fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    compile files('libs/twitter4j-core-3.0.5-javadoc copy.jar')
-    compile files('libs/twitter4j-core-3.0.5-sources copy.jar')
     compile files('libs/twitter4j-core-3.0.5.jar')
     compile files('libs/mopub-sdk.jar')
     compile files('libs/MMSDK.jar')

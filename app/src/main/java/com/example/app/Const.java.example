@@ -1,0 +1,15 @@
+package com.example.app;
+
+/**
+ * Copy this file to Const.java and replace the placeholder values locally.
+ * Const.java is ignored by git so OAuth and ad-network values do not get
+ * committed.
+ */
+public class Const {
+    public static String TWITTER_CONSUMER_KEY = "replace-with-twitter-consumer-key";
+    public static String TWITTER_CONSUMER_SECRET = "replace-with-twitter-consumer-secret";
+    public static String TWITTER_CALLBACK_URL = "oauth://t4jsample";
+    public static String TAG = "SampleAndroidApp";
+    public static String MoPubBannerId = "replace-with-mopub-banner-id";
+    public static String MoPubMiniBannerId = "replace-with-mopub-mini-banner-id";
+}

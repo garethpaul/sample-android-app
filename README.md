@@ -40,9 +40,14 @@ Additional scan context:
 ```bash
 git clone https://github.com/garethpaul/sample-android-app.git
 cd sample-android-app
+cp app/src/main/java/com/example/app/Const.java.example app/src/main/java/com/example/app/Const.java
 ```
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
+
+Fill the copied `Const.java` with local Twitter OAuth and ad-network values.
+The real file is ignored by git; keep the checked-in `.example` file free of
+secrets.
 
 ## Running or Using the Project
 
@@ -51,6 +56,10 @@ The setup commands above are derived from repository files. Legacy mobile, Pytho
 ## Testing and Verification
 
 - `./gradlew test` or Android Studio's test runner when the SDK is configured
+- `make verify` runs static checks for wrapper safety, ignored build outputs,
+  local credential templates, and hardcoded ad-unit values. Set
+  `RUN_LEGACY_GRADLE=1` to attempt the legacy Gradle build on a compatible
+  Android SDK.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
