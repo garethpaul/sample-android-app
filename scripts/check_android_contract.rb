@@ -3,6 +3,18 @@
 
 failures = []
 
+docs_plans = Dir['docs/plans/*.md'].sort
+canonical_plan = 'docs/plans/2026-06-08-sample-android-app-baseline.md'
+failures << "#{canonical_plan} is missing" unless File.exist?(canonical_plan)
+failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
+
+docs_plans.each do |plan_path|
+  plan = File.read(plan_path)
+  unless plan.include?('Status: Completed') && plan.include?('make check')
+    failures << "#{plan_path} must record completed status and make check verification"
+  end
+end
+
 unless File.executable?('gradlew')
   failures << 'gradlew must be executable'
 end

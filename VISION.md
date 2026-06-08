@@ -17,6 +17,7 @@ Priority:
 - Keep Twitter and ad-network credentials out of source control
 - Keep helper failures observable during static verification
 - Maintain screenshot references for visual context
+- Keep completed maintenance plans under `docs/plans`
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:

@@ -17,3 +17,5 @@
 - Replaced dynamic legacy Gradle and appcompat dependency versions with pinned
   versions and removed missing javadoc/source jar dependencies.
 - Moved the home-screen MoPub ad unit lookup to `Const.MoPubMiniBannerId`.
+- Added canonical `docs/plans` coverage and made the Android contract checker
+  require completed plans.
