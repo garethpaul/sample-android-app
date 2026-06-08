@@ -44,3 +44,6 @@ session, or ad data without documented consent.
 - Hidden analytics or ad behavior
 - Production-readiness claims
 - Broad Android rewrites without preserving the sample flow
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
