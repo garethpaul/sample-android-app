@@ -50,6 +50,16 @@ end
 tracked_const = `git ls-files app/src/main/java/com/example/app/Const.java`.strip
 failures << 'real Const.java must stay untracked' unless tracked_const.empty?
 
+manifest_path = 'app/src/main/AndroidManifest.xml'
+if File.exist?(manifest_path)
+  manifest = File.read(manifest_path)
+  unless manifest.include?('android:allowBackup="false"')
+    failures << "#{manifest_path} must disable android:allowBackup"
+  end
+else
+  failures << "#{manifest_path} is missing"
+end
+
 const_example = 'app/src/main/java/com/example/app/Const.java.example'
 if File.exist?(const_example)
   source = File.read(const_example)

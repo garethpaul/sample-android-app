@@ -2,6 +2,8 @@
 
 ## 2026-06-08
 
+- Disabled Android app backup in the manifest and added a static contract check
+  to preserve the privacy guard.
 - Added `make check` as the shared repository verification alias.
 - Narrowed `Utils.CopyStream` failure handling to `IOException` and added
   Android error logging so stream-copy failures are observable.

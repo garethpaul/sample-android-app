@@ -63,7 +63,8 @@ secrets.
 - `./gradlew test` or Android Studio's test runner when the SDK is configured
 - `make check` runs static checks for wrapper safety, ignored build outputs,
   local credential templates, hardcoded ad-unit values, and observable
-  stream-copy error handling. Set
+  stream-copy error handling.
+- `make check` also requires app backup to stay disabled in the manifest. Set
   `RUN_LEGACY_GRADLE=1` to attempt the legacy Gradle build on a compatible
   Android SDK.
 - The static checker also requires completed canonical plans under `docs/plans`.
@@ -89,6 +90,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-sample-android-app-baseline.md` for the canonical
   Android sample contract baseline.
+- See `docs/plans/2026-06-08-disable-app-backup.md` for the manifest backup
+  privacy guard.
 
 ## Contributing
 
