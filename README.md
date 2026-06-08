@@ -80,4 +80,4 @@ Keep changes small and tied to the project that is already present in this repos
 
 Prior README summary:
 
-> sample-android-app <!-- README-OVERVIEW-IMAGE --> sample-android-app ================== This is a sample android application. Important - This code isn't particularly clean or well structured. All work is my own and is not representative of something that should be used in production :-) Currently the app broadly implements > Twitter oAuth for Login / Signup > MoPub for monetization
+> sample-android-app sample-android-app ================== This is a sample android application. Important - This code isn't particularly clean or well structured. All work is my own and is not representative of something that should be used in production :-) Currently the app broadly implements > Twitter oAuth for Login / Signup > MoPub for monetization
