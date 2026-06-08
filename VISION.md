@@ -38,7 +38,7 @@ Auth and monetization samples can affect real users and accounts. The app
 should make external services explicit and should avoid collecting profile,
 session, or ad data without documented consent.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Checked-in credentials
 - Hidden analytics or ad behavior
