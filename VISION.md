@@ -34,6 +34,11 @@ Contribution rules:
 
 ## Security And Responsible Use
 
+Canonical security policy and reporting:
+
+- [`SECURITY.md`](SECURITY.md)
+
+
 Auth and monetization samples can affect real users and accounts. The app
 should make external services explicit and should avoid collecting profile,
 session, or ad data without documented consent.
