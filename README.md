@@ -1,3 +1,8 @@
+# sample-android-app
+
+<!-- README-OVERVIEW-IMAGE -->
+![Project overview](docs/readme-overview.svg)
+
 sample-android-app
 ==================
 
