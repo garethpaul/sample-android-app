@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'rexml/document'
+
 failures = []
 
 docs_plans = Dir['docs/plans/*.md'].sort
@@ -55,6 +57,44 @@ if File.exist?(manifest_path)
   manifest = File.read(manifest_path)
   unless manifest.include?('android:allowBackup="false"')
     failures << "#{manifest_path} must disable android:allowBackup"
+  end
+
+  begin
+    manifest_doc = REXML::Document.new(manifest)
+    launcher_activities = []
+    oauth_activities = []
+
+    REXML::XPath.each(manifest_doc, '/manifest/application/activity') do |activity|
+      activity_name = activity.attributes['android:name']
+      activity.get_elements('intent-filter').each do |intent_filter|
+        actions = intent_filter.get_elements('action').map { |action| action.attributes['android:name'] }
+        categories = intent_filter.get_elements('category').map { |category| category.attributes['android:name'] }
+        oauth_data = intent_filter.get_elements('data').any? do |data|
+          data.attributes['android:scheme'] == 'oauth' && data.attributes['android:host'] == 't4jsample'
+        end
+
+        if actions.include?('android.intent.action.MAIN') &&
+           categories.include?('android.intent.category.LAUNCHER')
+          launcher_activities << activity_name
+        end
+
+        if actions.include?('android.intent.action.VIEW') &&
+           categories.include?('android.intent.category.BROWSABLE') &&
+           oauth_data
+          oauth_activities << activity_name
+        end
+      end
+    end
+
+    expected_entrypoint = ['com.example.app.MainActivity']
+    unless launcher_activities == expected_entrypoint
+      failures << "#{manifest_path} must expose only MainActivity as the launcher entry point"
+    end
+    unless oauth_activities == expected_entrypoint
+      failures << "#{manifest_path} must expose only MainActivity for the oauth://t4jsample callback"
+    end
+  rescue REXML::ParseException => e
+    failures << "#{manifest_path} is invalid XML: #{e.message}"
   end
 else
   failures << "#{manifest_path} is missing"

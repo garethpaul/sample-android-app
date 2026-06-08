@@ -17,6 +17,7 @@ Priority:
 - Keep Twitter and ad-network credentials out of source control
 - Keep helper failures observable during static verification
 - Keep app backup disabled for credential-adjacent runtime state
+- Keep launcher and OAuth callback exposure limited to the login entry point
 - Maintain screenshot references for visual context
 - Keep completed maintenance plans under `docs/plans`
 - Treat the Android project structure and dependencies as legacy

@@ -67,6 +67,8 @@ secrets.
 - `make check` also requires app backup to stay disabled in the manifest. Set
   `RUN_LEGACY_GRADLE=1` to attempt the legacy Gradle build on a compatible
   Android SDK.
+- `make check` also verifies that only `MainActivity` exposes the launcher and
+  `oauth://t4jsample` callback entry points.
 - The static checker also requires completed canonical plans under `docs/plans`.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -92,6 +94,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   Android sample contract baseline.
 - See `docs/plans/2026-06-08-disable-app-backup.md` for the manifest backup
   privacy guard.
+- See `docs/plans/2026-06-08-manifest-entrypoints.md` for the launcher and
+  OAuth callback exposure guard.
 
 ## Contributing
 
