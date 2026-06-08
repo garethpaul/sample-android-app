@@ -56,7 +56,7 @@ secrets.
 ## Testing and Verification
 
 - `./gradlew test` or Android Studio's test runner when the SDK is configured
-- `make verify` runs static checks for wrapper safety, ignored build outputs,
+- `make check` runs static checks for wrapper safety, ignored build outputs,
   local credential templates, hardcoded ad-unit values, and observable
   stream-copy error handling. Set
   `RUN_LEGACY_GRADLE=1` to attempt the legacy Gradle build on a compatible

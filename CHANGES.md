@@ -2,6 +2,7 @@
 
 ## 2026-06-08
 
+- Added `make check` as the shared repository verification alias.
 - Narrowed `Utils.CopyStream` failure handling to `IOException` and added
   Android error logging so stream-copy failures are observable.
 - Extended the Android contract checker to reject broad swallowed exceptions in
