@@ -75,9 +75,3 @@ When the required SDK or runtime is unavailable, use static checks and source re
 ## Contributing
 
 Keep changes small and tied to the project that is already present in this repository. For code changes, document the toolchain used, avoid committing generated dependency directories or local configuration, and update this README when setup or verification steps change.
-
-## Existing Project Notes
-
-Prior README summary:
-
-> sample-android-app sample-android-app ================== This is a sample android application. Important - This code isn't particularly clean or well structured. All work is my own and is not representative of something that should be used in production :-) Currently the app broadly implements > Twitter oAuth for Login / Signup > MoPub for monetization
