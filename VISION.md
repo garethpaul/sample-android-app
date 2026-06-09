@@ -19,6 +19,7 @@ Priority:
 - Keep app backup disabled for credential-adjacent runtime state
 - Keep launcher and OAuth callback exposure limited to the login entry point
 - Keep image cache data in app-internal storage
+- Keep image-load failures observable without crashing bitmap rendering
 - Avoid optional location and shared-storage permissions in the default sample
 - Maintain screenshot references for visual context
 - Keep completed maintenance plans under `docs/plans`

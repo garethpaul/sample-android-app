@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Replaced broad image-load stack traces with tagged `IOException` logging,
+  HTTP/stream cleanup, and a failed-decode guard before bitmap rounding.
 - Moved image caching to app-internal cache storage and removed default storage
   and coarse-location permissions from the manifest.
 - Extended the Android contract checker to require the minimal network-only

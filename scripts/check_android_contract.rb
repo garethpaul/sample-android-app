@@ -166,6 +166,25 @@ else
   failures << "#{file_cache_path} is missing"
 end
 
+image_loader_path = 'app/src/main/java/com/example/app/ImageLoader.java'
+if File.exist?(image_loader_path)
+  image_loader_source = File.read(image_loader_path)
+  if image_loader_source.include?('printStackTrace()')
+    failures << "#{image_loader_path} must log image load failures instead of printing stack traces"
+  end
+  if image_loader_source.match?(/catch\s*\(\s*Exception\b/)
+    failures << "#{image_loader_path} must not catch broad Exception while loading images"
+  end
+  unless image_loader_source.include?('Log.e(TAG, "Failed to load image", ex);')
+    failures << "#{image_loader_path} must log image load IOException failures"
+  end
+  unless image_loader_source.include?('if(bitmap == null)')
+    failures << "#{image_loader_path} must guard failed bitmap decodes before rounding images"
+  end
+else
+  failures << "#{image_loader_path} is missing"
+end
+
 if failures.empty?
   puts 'Android sample contract checks passed'
 else

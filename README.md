@@ -71,6 +71,8 @@ secrets.
   `oauth://t4jsample` callback entry points.
 - `make check` also verifies that the manifest requests only network access and
   that image cache data stays in app-internal cache storage.
+- `make check` also verifies image-load failures are logged through Android's
+  logger and failed decodes are guarded before rounded bitmap rendering.
 - The static checker also requires completed canonical plans under `docs/plans`.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -100,6 +102,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   OAuth callback exposure guard.
 - See `docs/plans/2026-06-09-internal-image-cache.md` for the storage and
   location permission minimization guard.
+- See `docs/plans/2026-06-09-image-loader-failure-handling.md` for the
+  ImageLoader failure handling guard.
 
 ## Contributing
 

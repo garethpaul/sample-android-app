@@ -3,9 +3,11 @@ package com.example.app;
 
 
 import java.io.File;
+import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -20,6 +22,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.widget.ImageView;
 import android.graphics.Bitmap.*;
 import android.graphics.Canvas;
@@ -31,6 +34,7 @@ import android.graphics.PorterDuff.Mode;
 
 public class ImageLoader {
 
+    private static final String TAG = ImageLoader.class.getSimpleName();
     MemoryCache memoryCache=new MemoryCache();
     FileCache fileCache;
     private Map<ImageView, String> imageViews=Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
@@ -71,40 +75,59 @@ public class ImageLoader {
             return b;
 
         //from web
+        HttpURLConnection conn = null;
+        InputStream is = null;
+        OutputStream os = null;
         try {
-            Bitmap bitmap=null;
             URL imageUrl = new URL(url);
-            HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
+            conn = (HttpURLConnection)imageUrl.openConnection();
             conn.setConnectTimeout(30000);
             conn.setReadTimeout(30000);
             conn.setInstanceFollowRedirects(true);
-            InputStream is=conn.getInputStream();
-            OutputStream os = new FileOutputStream(f);
+            is=conn.getInputStream();
+            os = new FileOutputStream(f);
             Utils.CopyStream(is, os);
-            os.close();
-            bitmap = decodeFile(f);
-            Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                    bitmap.getHeight(), Config.ARGB_8888);
-            Canvas canvas = new Canvas(output);
-
-            final int color = 0xff424242;
-            final Paint paint = new Paint();
-            final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-            final RectF rectF = new RectF(rect);
-            final float roundPx = 52;
-
-            paint.setAntiAlias(true);
-            canvas.drawARGB(0, 0, 0, 0);
-            paint.setColor(color);
-            canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-
-            paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
-            canvas.drawBitmap(bitmap, rect, rect, paint);
-            return output;
-
-        } catch (Exception ex){
-            ex.printStackTrace();
+        } catch (IOException ex){
+            Log.e(TAG, "Failed to load image", ex);
             return null;
+        } finally {
+            closeQuietly(os);
+            closeQuietly(is);
+            if(conn != null)
+                conn.disconnect();
+        }
+
+        Bitmap bitmap = decodeFile(f);
+        if(bitmap == null)
+            return null;
+
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+        final float roundPx = 52;
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return output;
+    }
+
+    private void closeQuietly(Closeable closeable) {
+        if(closeable == null)
+            return;
+        try {
+            closeable.close();
+        } catch (IOException ex) {
+            Log.e(TAG, "Failed to close image stream", ex);
         }
     }
 
