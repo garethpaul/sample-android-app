@@ -20,6 +20,7 @@ Priority:
 - Keep launcher and OAuth callback exposure limited to the login entry point
 - Keep image cache data in app-internal storage
 - Keep image-load failures observable without crashing bitmap rendering
+- Keep partial image cache writes from being decoded
 - Keep profile image failures observable and placeholder-backed
 - Avoid optional location and shared-storage permissions in the default sample
 - Maintain screenshot references for visual context

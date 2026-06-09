@@ -142,6 +142,12 @@ if File.exist?(utils_path)
   if utils_source.match?(/catch\s*\(\s*Exception\b/)
     failures << "#{utils_path} must not swallow broad Exception failures"
   end
+  unless utils_source.include?('public static boolean CopyStream')
+    failures << "#{utils_path} must return whether stream-copy completed"
+  end
+  unless utils_source.include?('return true;') && utils_source.include?('return false;')
+    failures << "#{utils_path} must return true on successful stream copy and false on IOException"
+  end
   unless utils_source.match?(/catch\s*\(\s*IOException\b/)
     failures << "#{utils_path} must catch IOException for stream-copy failures"
   end
@@ -174,6 +180,17 @@ if File.exist?(image_loader_path)
   end
   if image_loader_source.match?(/catch\s*\(\s*Exception\b/)
     failures << "#{image_loader_path} must not catch broad Exception while loading images"
+  end
+  if image_loader_source.match?(/^\s*Utils\.CopyStream\(is, os\);/)
+    failures << "#{image_loader_path} must branch on stream-copy success before decoding cached images"
+  end
+  unless image_loader_source.include?('copied = Utils.CopyStream(is, os);') &&
+         image_loader_source.include?('if(!copied)')
+    failures << "#{image_loader_path} must stop decoding when an image cache write fails"
+  end
+  unless image_loader_source.include?('deleteQuietly(f);') &&
+         image_loader_source.include?('Failed to delete partial image cache file')
+    failures << "#{image_loader_path} must delete partial image cache files after failed writes"
   end
   unless image_loader_source.include?('Log.e(TAG, "Failed to load image", ex);')
     failures << "#{image_loader_path} must log image load IOException failures"

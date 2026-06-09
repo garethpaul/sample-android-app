@@ -9,7 +9,7 @@ import java.io.OutputStream;
 public class Utils {
     private static final String TAG = Utils.class.getSimpleName();
 
-    public static void CopyStream(InputStream is, OutputStream os)
+    public static boolean CopyStream(InputStream is, OutputStream os)
     {
         final int buffer_size=1024;
         try
@@ -22,10 +22,12 @@ public class Utils {
                     break;
                 os.write(bytes, 0, count);
             }
+            return true;
         }
         catch(IOException ex)
         {
             Log.e(TAG, "Failed to copy stream", ex);
+            return false;
         }
     }
 }

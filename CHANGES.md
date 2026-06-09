@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Made image cache writes report copy success, and delete partial cache files
+  before decoding when a download copy fails.
 - Added tagged logging, null guards, stream cleanup, and placeholder fallback
   for profile image download failures.
 - Replaced broad image-load stack traces with tagged `IOException` logging,

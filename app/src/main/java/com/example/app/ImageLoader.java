@@ -78,6 +78,7 @@ public class ImageLoader {
         HttpURLConnection conn = null;
         InputStream is = null;
         OutputStream os = null;
+        boolean copied = false;
         try {
             URL imageUrl = new URL(url);
             conn = (HttpURLConnection)imageUrl.openConnection();
@@ -86,7 +87,7 @@ public class ImageLoader {
             conn.setInstanceFollowRedirects(true);
             is=conn.getInputStream();
             os = new FileOutputStream(f);
-            Utils.CopyStream(is, os);
+            copied = Utils.CopyStream(is, os);
         } catch (IOException ex){
             Log.e(TAG, "Failed to load image", ex);
             return null;
@@ -95,6 +96,11 @@ public class ImageLoader {
             closeQuietly(is);
             if(conn != null)
                 conn.disconnect();
+        }
+
+        if(!copied) {
+            deleteQuietly(f);
+            return null;
         }
 
         Bitmap bitmap = decodeFile(f);
@@ -129,6 +135,13 @@ public class ImageLoader {
         } catch (IOException ex) {
             Log.e(TAG, "Failed to close image stream", ex);
         }
+    }
+
+    private void deleteQuietly(File file) {
+        if(file == null || !file.exists())
+            return;
+        if(!file.delete())
+            Log.e(TAG, "Failed to delete partial image cache file");
     }
 
     //decodes image and scales it to reduce memory consumption
