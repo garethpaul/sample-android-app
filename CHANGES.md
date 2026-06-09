@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Declared explicit manifest exported state for `MainActivity` and
+  `HomeActivity`, with static checker coverage.
 - Removed tracked IntelliJ `.idea` and `.iml` metadata with static checker
   coverage to keep local IDE files ignored.
 - Guarded null and empty image URLs before cache lookup, preserving placeholder

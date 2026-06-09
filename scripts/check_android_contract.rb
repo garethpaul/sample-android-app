@@ -8,8 +8,10 @@ failures = []
 docs_plans = Dir['docs/plans/*.md'].sort
 canonical_plan = 'docs/plans/2026-06-08-sample-android-app-baseline.md'
 ide_metadata_plan = 'docs/plans/2026-06-09-ide-metadata-ignore.md'
+exported_state_plan = 'docs/plans/2026-06-09-manifest-exported-state.md'
 failures << "#{canonical_plan} is missing" unless File.exist?(canonical_plan)
 failures << "#{ide_metadata_plan} is missing" unless File.exist?(ide_metadata_plan)
+failures << "#{exported_state_plan} is missing" unless File.exist?(exported_state_plan)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
 
 docs_plans.each do |plan_path|
@@ -110,6 +112,22 @@ if File.exist?(manifest_path)
     end
     unless oauth_activities == expected_entrypoint
       failures << "#{manifest_path} must expose only MainActivity for the oauth://t4jsample callback"
+    end
+
+    expected_exported = {
+      'com.example.app.MainActivity' => 'true',
+      'com.example.app.HomeActivity' => 'false'
+    }
+    expected_exported.each do |activity_name, exported|
+      activity = REXML::XPath.first(
+        manifest_doc,
+        "/manifest/application/activity[@android:name='#{activity_name}']"
+      )
+      if activity.nil?
+        failures << "#{manifest_path} must declare #{activity_name}"
+      elsif activity.attributes['android:exported'] != exported
+        failures << "#{manifest_path} must set #{activity_name} android:exported=\"#{exported}\""
+      end
     end
   rescue REXML::ParseException => e
     failures << "#{manifest_path} is invalid XML: #{e.message}"

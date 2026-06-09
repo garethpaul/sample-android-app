@@ -31,6 +31,8 @@ Helpful reports include:
 - Review found mobile permission or privacy-sensitive data handling; changes in those areas should receive security-focused review before merge.
 - Review found file, document, data, or media parsing flows; changes in those areas should receive security-focused review before merge.
 - Dependency manifests detected: build.gradle, gradle.properties. Dependency updates should preserve lockfiles when present and avoid introducing packages without a clear maintenance reason.
+- Manifest exported state should stay explicit for the login and home
+  activities so OAuth callback exposure is reviewed deliberately.
 
 ## Mobile Privacy Notes
 

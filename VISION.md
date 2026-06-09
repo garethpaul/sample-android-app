@@ -19,6 +19,7 @@ Priority:
 - Keep local IDE metadata out of the portable sample
 - Keep app backup disabled for credential-adjacent runtime state
 - Keep launcher and OAuth callback exposure limited to the login entry point
+- Keep activity exported state explicit in the manifest
 - Keep image cache data in app-internal storage
 - Keep image-load failures observable without crashing bitmap rendering
 - Keep partial image cache writes from being decoded

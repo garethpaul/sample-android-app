@@ -69,6 +69,8 @@ secrets.
   Android SDK.
 - `make check` also verifies that only `MainActivity` exposes the launcher and
   `oauth://t4jsample` callback entry points.
+- `make check` also verifies that manifest exported state is explicit for
+  `MainActivity` and `HomeActivity`.
 - `make check` also verifies that the manifest requests only network access and
   that image cache data stays in app-internal cache storage.
 - `make check` also verifies image-load failures are logged through Android's
@@ -123,6 +125,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   image failure handling guard.
 - See `docs/plans/2026-06-09-ide-metadata-ignore.md` for local IDE metadata
   ignore coverage.
+- See `docs/plans/2026-06-09-manifest-exported-state.md` for explicit
+  activity exported-state coverage.
 
 ## Contributing
 
