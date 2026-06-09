@@ -61,6 +61,17 @@ if File.exist?(manifest_path)
 
   begin
     manifest_doc = REXML::Document.new(manifest)
+    declared_permissions = REXML::XPath.match(manifest_doc, '/manifest/uses-permission').map do |permission|
+      permission.attributes['android:name']
+    end.compact.sort
+    expected_permissions = [
+      'android.permission.ACCESS_NETWORK_STATE',
+      'android.permission.INTERNET'
+    ].sort
+    unless declared_permissions == expected_permissions
+      failures << "#{manifest_path} must request only #{expected_permissions.join(', ')}"
+    end
+
     launcher_activities = []
     oauth_activities = []
 
@@ -139,6 +150,20 @@ if File.exist?(utils_path)
   end
 else
   failures << "#{utils_path} is missing"
+end
+
+file_cache_path = 'app/src/main/java/com/example/app/FileCache.java'
+if File.exist?(file_cache_path)
+  file_cache_source = File.read(file_cache_path)
+  if file_cache_source.include?('getExternalStorageDirectory') ||
+     file_cache_source.include?('Environment.getExternalStorageState')
+    failures << "#{file_cache_path} must keep image cache data in app-internal cache storage"
+  end
+  unless file_cache_source.include?('context.getCacheDir()')
+    failures << "#{file_cache_path} must use context.getCacheDir() for image cache storage"
+  end
+else
+  failures << "#{file_cache_path} is missing"
 end
 
 if failures.empty?

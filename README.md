@@ -69,6 +69,8 @@ secrets.
   Android SDK.
 - `make check` also verifies that only `MainActivity` exposes the launcher and
   `oauth://t4jsample` callback entry points.
+- `make check` also verifies that the manifest requests only network access and
+  that image cache data stays in app-internal cache storage.
 - The static checker also requires completed canonical plans under `docs/plans`.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -96,6 +98,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   privacy guard.
 - See `docs/plans/2026-06-08-manifest-entrypoints.md` for the launcher and
   OAuth callback exposure guard.
+- See `docs/plans/2026-06-09-internal-image-cache.md` for the storage and
+  location permission minimization guard.
 
 ## Contributing
 

@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-09
+
+- Moved image caching to app-internal cache storage and removed default storage
+  and coarse-location permissions from the manifest.
+- Extended the Android contract checker to require the minimal network-only
+  permission set and reject external-cache storage drift.
+
 ## 2026-06-08
 
 - Removed duplicate `HomeActivity` launcher and OAuth callback intent filters,
