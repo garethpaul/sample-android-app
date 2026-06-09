@@ -146,11 +146,16 @@ public class ImageLoader {
 
     //decodes image and scales it to reduce memory consumption
     private Bitmap decodeFile(File f){
+        InputStream boundsStream = null;
+        InputStream bitmapStream = null;
         try {
             //decode image size
             BitmapFactory.Options o = new BitmapFactory.Options();
             o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(f),null,o);
+            boundsStream = new FileInputStream(f);
+            BitmapFactory.decodeStream(boundsStream,null,o);
+            closeQuietly(boundsStream);
+            boundsStream = null;
 
             //Find the correct scale value. It should be the power of 2.
             final int REQUIRED_SIZE=70;
@@ -167,8 +172,14 @@ public class ImageLoader {
             //decode with inSampleSize
             BitmapFactory.Options o2 = new BitmapFactory.Options();
             o2.inSampleSize=scale;
-            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-        } catch (FileNotFoundException e) {}
+            bitmapStream = new FileInputStream(f);
+            return BitmapFactory.decodeStream(bitmapStream, null, o2);
+        } catch (FileNotFoundException ex) {
+            Log.e(TAG, "Failed to decode cached image", ex);
+        } finally {
+            closeQuietly(boundsStream);
+            closeQuietly(bitmapStream);
+        }
         return null;
     }
 

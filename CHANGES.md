@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Closed cached image decode streams and logged cache decode failures, with
+  static validation for the ImageLoader path.
 - Made image cache writes report copy success, and delete partial cache files
   before decoding when a download copy fails.
 - Added tagged logging, null guards, stream cleanup, and placeholder fallback

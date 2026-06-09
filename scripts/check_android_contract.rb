@@ -198,6 +198,18 @@ if File.exist?(image_loader_path)
   unless image_loader_source.include?('if(bitmap == null)')
     failures << "#{image_loader_path} must guard failed bitmap decodes before rounding images"
   end
+  if image_loader_source.match?(/catch\s*\(\s*FileNotFoundException\s+\w+\)\s*\{\s*\}/)
+    failures << "#{image_loader_path} must log cached image decode FileNotFoundException failures"
+  end
+  unless image_loader_source.include?('InputStream boundsStream = null;') &&
+         image_loader_source.include?('InputStream bitmapStream = null;') &&
+         image_loader_source.include?('closeQuietly(boundsStream);') &&
+         image_loader_source.include?('closeQuietly(bitmapStream);')
+    failures << "#{image_loader_path} must close cached image decode streams"
+  end
+  unless image_loader_source.include?('Log.e(TAG, "Failed to decode cached image", ex);')
+    failures << "#{image_loader_path} must log cached image decode failures"
+  end
 else
   failures << "#{image_loader_path} is missing"
 end
