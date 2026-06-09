@@ -77,6 +77,8 @@ secrets.
   cache files are deleted after failed copies.
 - `make check` also verifies cached image decode streams are closed and decode
   failures are logged.
+- `make check` also verifies null or empty image URLs show the placeholder
+  without queueing cache work.
 - `make check` also verifies profile image downloads log failures, guard failed
   decodes, and show the placeholder image on failure.
 - The static checker also requires completed canonical plans under `docs/plans`.
@@ -114,6 +116,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   write-result and partial-file cleanup guard.
 - See `docs/plans/2026-06-09-image-cache-decode-cleanup.md` for the cached
   image decode stream cleanup guard.
+- See `docs/plans/2026-06-09-empty-image-url-guard.md` for the empty image URL
+  placeholder guard.
 - See `docs/plans/2026-06-09-profile-image-failure-guard.md` for the profile
   image failure handling guard.
 

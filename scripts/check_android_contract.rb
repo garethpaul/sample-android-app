@@ -210,6 +210,11 @@ if File.exist?(image_loader_path)
   unless image_loader_source.include?('Log.e(TAG, "Failed to decode cached image", ex);')
     failures << "#{image_loader_path} must log cached image decode failures"
   end
+  unless image_loader_source.include?('if(url == null || url.length() == 0)') &&
+         image_loader_source.include?('imageViews.remove(imageView);') &&
+         image_loader_source.include?('imageView.setImageResource(stub_id);')
+    failures << "#{image_loader_path} must show the placeholder and skip loading when an image URL is empty"
+  end
 else
   failures << "#{image_loader_path} is missing"
 end

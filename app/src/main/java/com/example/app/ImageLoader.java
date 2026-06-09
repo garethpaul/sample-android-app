@@ -48,6 +48,12 @@ public class ImageLoader {
     final int stub_id = R.drawable.no_image;
     public void DisplayImage(String url, ImageView imageView)
     {
+        if(url == null || url.length() == 0) {
+            imageViews.remove(imageView);
+            imageView.setImageResource(stub_id);
+            return;
+        }
+
         imageViews.put(imageView, url);
         Bitmap bitmap=memoryCache.get(url);
         if(bitmap!=null)
