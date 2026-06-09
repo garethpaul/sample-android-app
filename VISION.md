@@ -16,6 +16,7 @@ Priority:
 - Preserve the login and home-screen sample flow
 - Keep Twitter and ad-network credentials out of source control
 - Keep helper failures observable during static verification
+- Keep local IDE metadata out of the portable sample
 - Keep app backup disabled for credential-adjacent runtime state
 - Keep launcher and OAuth callback exposure limited to the login entry point
 - Keep image cache data in app-internal storage

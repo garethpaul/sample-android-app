@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Removed tracked IntelliJ `.idea` and `.iml` metadata with static checker
+  coverage to keep local IDE files ignored.
 - Guarded null and empty image URLs before cache lookup, preserving placeholder
   display and avoiding `url.hashCode()` crashes.
 - Closed cached image decode streams and logged cache decode failures, with

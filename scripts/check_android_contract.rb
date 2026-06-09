@@ -7,7 +7,9 @@ failures = []
 
 docs_plans = Dir['docs/plans/*.md'].sort
 canonical_plan = 'docs/plans/2026-06-08-sample-android-app-baseline.md'
+ide_metadata_plan = 'docs/plans/2026-06-09-ide-metadata-ignore.md'
 failures << "#{canonical_plan} is missing" unless File.exist?(canonical_plan)
+failures << "#{ide_metadata_plan} is missing" unless File.exist?(ide_metadata_plan)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
 
 docs_plans.each do |plan_path|
@@ -45,8 +47,13 @@ unless tracked_build_outputs.empty?
 end
 
 gitignore = File.exist?('.gitignore') ? File.read('.gitignore') : ''
-%w[build/ app/build/ Const.java *.class *.dex].each do |pattern|
+%w[build/ app/build/ Const.java *.class *.dex .idea/ *.iml].each do |pattern|
   failures << ".gitignore must include #{pattern}" unless gitignore.lines.map(&:strip).include?(pattern)
+end
+
+tracked_ide_metadata = `git ls-files .idea '*.iml'`.split("\n").select { |path| File.exist?(path) }
+unless tracked_ide_metadata.empty?
+  failures << "IDE metadata must not be tracked: #{tracked_ide_metadata.join(', ')}"
 end
 
 tracked_const = `git ls-files app/src/main/java/com/example/app/Const.java`.strip

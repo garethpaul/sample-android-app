@@ -81,6 +81,7 @@ secrets.
   without queueing cache work.
 - `make check` also verifies profile image downloads log failures, guard failed
   decodes, and show the placeholder image on failure.
+- `make check` also verifies local IDE metadata stays ignored and untracked.
 - The static checker also requires completed canonical plans under `docs/plans`.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -120,6 +121,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   placeholder guard.
 - See `docs/plans/2026-06-09-profile-image-failure-guard.md` for the profile
   image failure handling guard.
+- See `docs/plans/2026-06-09-ide-metadata-ignore.md` for local IDE metadata
+  ignore coverage.
 
 ## Contributing
 
