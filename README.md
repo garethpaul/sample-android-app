@@ -73,6 +73,8 @@ secrets.
   that image cache data stays in app-internal cache storage.
 - `make check` also verifies image-load failures are logged through Android's
   logger and failed decodes are guarded before rounded bitmap rendering.
+- `make check` also verifies profile image downloads log failures, guard failed
+  decodes, and show the placeholder image on failure.
 - The static checker also requires completed canonical plans under `docs/plans`.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
@@ -104,6 +106,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   location permission minimization guard.
 - See `docs/plans/2026-06-09-image-loader-failure-handling.md` for the
   ImageLoader failure handling guard.
+- See `docs/plans/2026-06-09-profile-image-failure-guard.md` for the profile
+  image failure handling guard.
 
 ## Contributing
 

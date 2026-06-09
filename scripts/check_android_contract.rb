@@ -185,6 +185,28 @@ else
   failures << "#{image_loader_path} is missing"
 end
 
+home_activity_path = 'app/src/main/java/com/example/app/HomeActivity.java'
+if File.exist?(home_activity_path)
+  home_activity_source = File.read(home_activity_path)
+  if home_activity_source.include?('printStackTrace()')
+    failures << "#{home_activity_path} must log failures instead of printing stack traces"
+  end
+  if home_activity_source.match?(/catch\s*\(\s*Exception\b/)
+    failures << "#{home_activity_path} must not catch broad Exception while loading profile images"
+  end
+  unless home_activity_source.include?('Log.e(TAG, "Failed to download profile image", ex);')
+    failures << "#{home_activity_path} must log profile image download IOException failures"
+  end
+  unless home_activity_source.include?('if(bitmap == null)')
+    failures << "#{home_activity_path} must guard failed profile bitmap decodes before rounding images"
+  end
+  unless home_activity_source.include?('imageView.setImageResource(R.drawable.no_image);')
+    failures << "#{home_activity_path} must show the placeholder image when profile image loading fails"
+  end
+else
+  failures << "#{home_activity_path} is missing"
+end
+
 if failures.empty?
   puts 'Android sample contract checks passed'
 else

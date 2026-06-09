@@ -186,9 +186,8 @@ public class HomeActivity extends Activity {
             try {
                 Log.v(TAG,"Attempting to bring the tweets home");
                 bringTweets();
-            } catch (TwitterException e) {
-                Log.v(TAG, "Issue bringing tweets back home");
-                e.printStackTrace();
+            } catch (TwitterException ex) {
+                Log.e(TAG, "Issue bringing tweets back home", ex);
             }
             return null;
         }
@@ -267,7 +266,10 @@ public class HomeActivity extends Activity {
         // Sets the Bitmap returned by doInBackground
         @Override
         protected void onPostExecute(Bitmap result) {
-            imageView.setImageBitmap(result);
+            if(result != null)
+                imageView.setImageBitmap(result);
+            else
+                imageView.setImageResource(R.drawable.no_image);
         }
 
         // Creates Bitmap from InputStream and returns it
@@ -279,12 +281,25 @@ public class HomeActivity extends Activity {
 
             try {
                 stream = getHttpConnection(url);
+                if(stream == null)
+                    return null;
                 bitmap = BitmapFactory.
                         decodeStream(stream, null, bmOptions);
-                stream.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
+            } catch (IOException ex) {
+                Log.e(TAG, "Failed to download profile image", ex);
+                return null;
+            } finally {
+                if(stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException ex) {
+                        Log.e(TAG, "Failed to close profile image stream", ex);
+                    }
+                }
             }
+            if(bitmap == null)
+                return null;
+
             //return bitmap;
             Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                     bitmap.getHeight(), Bitmap.Config.ARGB_8888);
@@ -316,22 +331,18 @@ public class HomeActivity extends Activity {
         // Makes HttpURLConnection and returns InputStream
         private InputStream getHttpConnection(String urlString)
                 throws IOException {
-            InputStream stream = null;
             URL url = new URL(urlString);
             URLConnection connection = url.openConnection();
+            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+            httpConnection.setRequestMethod("GET");
+            httpConnection.connect();
 
-            try {
-                HttpURLConnection httpConnection = (HttpURLConnection) connection;
-                httpConnection.setRequestMethod("GET");
-                httpConnection.connect();
-
-                if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    stream = httpConnection.getInputStream();
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                return httpConnection.getInputStream();
             }
-            return stream;
+
+            httpConnection.disconnect();
+            return null;
         }
 
         private class StableArrayAdapter extends ArrayAdapter<String> {
