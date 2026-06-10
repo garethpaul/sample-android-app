@@ -296,6 +296,12 @@ if File.exist?(image_loader_path)
   unless image_loader_source.include?('Log.e(TAG, "Failed to load image", ex);')
     failures << "#{image_loader_path} must log image load IOException failures"
   end
+  unless image_loader_source.match?(/catch\s*\(\s*IOException\s+ex\s*\)\s*\{[^}]*Log\.e\(TAG, "Failed to load image", ex\);[^}]*deleteQuietly\(f\);[^}]*return null;/m)
+    failures << "#{image_loader_path} must delete partial cache files after image download exceptions"
+  end
+  unless image_loader_source.match?(/Bitmap bitmap = decodeFile\(f\);\s*if\s*\(bitmap == null\)\s*\{\s*deleteQuietly\(f\);\s*return null;\s*\}/m)
+    failures << "#{image_loader_path} must delete downloaded cache files that fail bitmap decoding"
+  end
   unless image_loader_source.include?('if(bitmap == null)')
     failures << "#{image_loader_path} must guard failed bitmap decodes before rounding images"
   end

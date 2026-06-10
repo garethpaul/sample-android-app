@@ -2,6 +2,8 @@
 
 ## 2026-06-10
 
+- Deleted partial or undecodable image cache files after transport and bitmap
+  decode failures, with static contract coverage.
 - Added a least-privilege GitHub Actions workflow that installs Ruby 3.3 and
   runs `make check` with Node 24-compatible actions pinned by commit and a
   five-minute timeout.

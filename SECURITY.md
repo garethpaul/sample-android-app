@@ -38,6 +38,8 @@ Helpful reports include:
   before merge.
 - CI actions stay pinned by commit and run with read-only repository contents
   permission.
+- Failed or non-image downloads should not leave partial payloads in the
+  app-internal image cache.
 
 ## Mobile Privacy Notes
 

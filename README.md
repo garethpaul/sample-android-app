@@ -77,6 +77,8 @@ secrets.
   logger and failed decodes are guarded before rounded bitmap rendering.
 - `make check` also verifies image cache writes report completion and partial
   cache files are deleted after failed copies.
+- `make check` also verifies download exceptions and invalid downloaded image
+  payloads do not leave unusable cache files behind.
 - `make check` also verifies cached image decode streams are closed and decode
   failures are logged.
 - `make check` also verifies null or empty image URLs show the placeholder
@@ -135,6 +137,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   baseline.
 - See `docs/plans/2026-06-10-vendored-sdk-integrity.md` for the vendored JAR
   integrity boundary.
+- See `docs/plans/2026-06-10-image-cache-failure-cleanup.md` for transport and
+  decode failure cache cleanup.
 
 ## Contributing
 
