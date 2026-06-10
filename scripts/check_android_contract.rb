@@ -27,7 +27,7 @@ end
 
 if File.exist?(ci_workflow)
   workflow = File.read(ci_workflow)
-  unless workflow.include?('actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5') &&
+  unless workflow.include?('actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10') &&
          workflow.include?('ruby/setup-ruby@12fd324f1d0b43274fdc8130f6980590a667c455') &&
          workflow.include?('ruby-version: "3.3"') &&
          workflow.include?('permissions:') &&

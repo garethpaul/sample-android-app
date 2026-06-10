@@ -3,7 +3,8 @@
 ## 2026-06-10
 
 - Added a least-privilege GitHub Actions workflow that installs Ruby 3.3 and
-  runs `make check` with actions pinned by commit and a five-minute timeout.
+  runs `make check` with Node 24-compatible actions pinned by commit and a
+  five-minute timeout.
 - Extended the Android contract checker and docs to require the hosted CI
   verification path.
 

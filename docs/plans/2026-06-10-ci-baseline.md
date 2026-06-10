@@ -13,7 +13,7 @@ independently enforceable.
 ## Changes
 
 - Added a GitHub Actions workflow that installs Ruby 3.3 and runs `make check`.
-- Pinned checkout and Ruby setup actions by verified commit SHA.
+- Pinned the Node 24 checkout and Ruby setup actions by verified commit SHA.
 - Restricted workflow permissions to read-only contents and bounded the job to
   five minutes.
 - Extended the Android contract checker and docs so future changes keep the
