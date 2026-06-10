@@ -45,6 +45,10 @@ If this project requests device permissions such as location, camera, microphone
 
 ## Dependency and Supply Chain Security
 
+The archived JARs under `app/libs` are covered by `app/libs/SHA256SUMS` and the
+static contract. A digest change requires explicit review; it does not imply
+that these obsolete SDKs are safe for new production use.
+
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 
 ## Safe Research Guidelines

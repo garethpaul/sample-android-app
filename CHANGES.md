@@ -7,6 +7,9 @@
   five-minute timeout.
 - Extended the Android contract checker and docs to require the hosted CI
   verification path.
+- Added SHA-256 integrity coverage for all four vendored SDK JARs.
+- Fixed hosted static validation to Ubuntu 24.04 with concurrency cancellation.
+- Made the Makefile and checker independent of the caller's directory.
 
 ## 2026-06-09
 

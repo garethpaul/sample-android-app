@@ -30,6 +30,7 @@ Priority:
 - Maintain screenshot references for visual context
 - Keep completed maintenance plans under `docs/plans`
 - Keep GitHub Actions aligned with the local Ruby `make check` baseline
+- Keep vendored SDK JAR contents covered by reviewed SHA-256 digests
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:

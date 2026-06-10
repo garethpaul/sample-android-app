@@ -2,6 +2,10 @@
 # frozen_string_literal: true
 
 require 'rexml/document'
+require 'digest'
+
+ROOT = File.expand_path('..', __dir__)
+Dir.chdir(ROOT)
 
 failures = []
 
@@ -10,11 +14,13 @@ canonical_plan = 'docs/plans/2026-06-08-sample-android-app-baseline.md'
 ide_metadata_plan = 'docs/plans/2026-06-09-ide-metadata-ignore.md'
 exported_state_plan = 'docs/plans/2026-06-09-manifest-exported-state.md'
 ci_plan = 'docs/plans/2026-06-10-ci-baseline.md'
+vendored_integrity_plan = 'docs/plans/2026-06-10-vendored-sdk-integrity.md'
 ci_workflow = '.github/workflows/check.yml'
 failures << "#{canonical_plan} is missing" unless File.exist?(canonical_plan)
 failures << "#{ide_metadata_plan} is missing" unless File.exist?(ide_metadata_plan)
 failures << "#{exported_state_plan} is missing" unless File.exist?(exported_state_plan)
 failures << "#{ci_plan} is missing" unless File.exist?(ci_plan)
+failures << "#{vendored_integrity_plan} is missing" unless File.exist?(vendored_integrity_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
 
@@ -30,6 +36,9 @@ if File.exist?(ci_workflow)
   unless workflow.include?('actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10') &&
          workflow.include?('ruby/setup-ruby@12fd324f1d0b43274fdc8130f6980590a667c455') &&
          workflow.include?('ruby-version: "3.3"') &&
+         workflow.include?('runs-on: ubuntu-24.04') &&
+         workflow.include?('concurrency:') &&
+         workflow.include?('cancel-in-progress: true') &&
          workflow.include?('permissions:') &&
          workflow.include?('contents: read') &&
          workflow.include?('timeout-minutes: 5') &&
@@ -37,6 +46,37 @@ if File.exist?(ci_workflow)
          workflow.include?('run: make check')
     failures << "#{ci_workflow} must keep the pinned, least-privilege Ruby 3.3 check baseline"
   end
+  workflow.scan(/^\s*uses:\s*([^@\s]+)@([^\s#]+)/).each do |action, revision|
+    unless revision.match?(/\A[a-f0-9]{40}\z/)
+      failures << "#{ci_workflow} action #{action} must be pinned to a full commit SHA"
+    end
+  end
+end
+
+vendored_manifest = 'app/libs/SHA256SUMS'
+vendored_jars = Dir['app/libs/*.jar'].sort
+if File.exist?(vendored_manifest)
+  expected_digests = {}
+  File.readlines(vendored_manifest, chomp: true).each do |line|
+    match = line.match(/\A([a-f0-9]{64})  (app\/libs\/[^\s]+\.jar)\z/)
+    if match
+      failures << "#{vendored_manifest} lists #{match[2]} more than once" if expected_digests.key?(match[2])
+      expected_digests[match[2]] = match[1]
+    else
+      failures << "#{vendored_manifest} contains invalid entry #{line.inspect}"
+    end
+  end
+  unless expected_digests.keys.sort == vendored_jars
+    failures << "#{vendored_manifest} must list every vendored JAR exactly once"
+  end
+  vendored_jars.each do |jar|
+    expected = expected_digests[jar]
+    if expected && Digest::SHA256.file(jar).hexdigest != expected
+      failures << "#{jar} does not match its checked-in SHA-256 digest"
+    end
+  end
+else
+  failures << "#{vendored_manifest} is missing"
 end
 
 project_docs = {
