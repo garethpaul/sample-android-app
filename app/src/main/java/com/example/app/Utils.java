@@ -26,7 +26,7 @@ public class Utils {
         }
         catch(IOException ex)
         {
-            Log.e(TAG, "Failed to copy stream", ex);
+            Log.e(TAG, "Failed to copy stream");
             return false;
         }
     }

@@ -163,10 +163,10 @@ else
 end
 
 project_docs = {
-  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat'],
-  'VISION.md' => ['GitHub Actions', 'sensitive Logcat'],
-  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat'],
-  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat']
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages'],
+  'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception'],
+  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects'],
+  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads']
 }
 
 project_docs.each do |path, required_phrases|
@@ -236,6 +236,35 @@ sensitive_log_patterns = {
   sensitive_log_patterns.each do |pattern, description|
     if source_without_comments.match?(pattern)
       failures << "#{path} must not write #{description} to sensitive Logcat output"
+    end
+  end
+end
+
+Dir['app/src/main/java/**/*.java'].sort.each do |path|
+  source = File.read(path)
+  code_without_strings = source
+    .gsub(/"(?:\\.|[^"\\])*"/m, '""')
+    .gsub(/'(?:\\.|[^'\\])*'/m, "''")
+  code = code_without_strings.gsub(%r{/\*.*?\*/}m, '').gsub(%r{//[^\n]*}, '')
+  if code.match?(/\.printStackTrace\s*\(/)
+    failures << "#{path} must not write exception stack traces to Logcat"
+  end
+
+  log_expressions = code.split(';').map do |statement|
+    log_start = statement.index(/(?:android\.util\.)?Log\.[a-z]+\s*\(/)
+    next unless log_start
+
+    expression = statement[log_start..-1]
+    arguments_start = expression.index('(')
+    expression[(arguments_start + 1)..-1]
+  end.compact
+  catch_variables = code.scan(
+    /catch\s*\(\s*(?:final\s+)?[\w.$<>\[\]?]+(?:\s*\|\s*[\w.$<>\[\]?]+)*\s+(\w+)\s*\)/
+  ).flatten.uniq
+  catch_variables.each do |variable|
+    variable_reference = /\b#{Regexp.escape(variable)}\b/
+    if log_expressions.any? { |expression| expression.match?(variable_reference) }
+      failures << "#{path} must not write caught exception #{variable} details to Logcat"
     end
   end
 end
@@ -355,7 +384,7 @@ if File.exist?(utils_path)
   unless utils_source.match?(/catch\s*\(\s*IOException\b/)
     failures << "#{utils_path} must catch IOException for stream-copy failures"
   end
-  unless utils_source.include?('Log.e(TAG, "Failed to copy stream", ex);')
+  unless utils_source.include?('Log.e(TAG, "Failed to copy stream");')
     failures << "#{utils_path} must log stream-copy IOException failures"
   end
 else
@@ -396,10 +425,10 @@ if File.exist?(image_loader_path)
          image_loader_source.include?('Failed to delete partial image cache file')
     failures << "#{image_loader_path} must delete partial image cache files after failed writes"
   end
-  unless image_loader_source.include?('Log.e(TAG, "Failed to load image", ex);')
+  unless image_loader_source.include?('Log.e(TAG, "Failed to load image");')
     failures << "#{image_loader_path} must log image load IOException failures"
   end
-  unless image_loader_source.match?(/catch\s*\(\s*IOException\s+ex\s*\)\s*\{[^}]*Log\.e\(TAG, "Failed to load image", ex\);[^}]*deleteQuietly\(f\);[^}]*return null;/m)
+  unless image_loader_source.match?(/catch\s*\(\s*IOException\s+ex\s*\)\s*\{[^}]*Log\.e\(TAG, "Failed to load image"\);[^}]*deleteQuietly\(f\);[^}]*return null;/m)
     failures << "#{image_loader_path} must delete partial cache files after image download exceptions"
   end
   unless image_loader_source.match?(/Bitmap bitmap = decodeFile\(f\);\s*if\s*\(bitmap == null\)\s*\{\s*deleteQuietly\(f\);\s*return null;\s*\}/m)
@@ -417,7 +446,7 @@ if File.exist?(image_loader_path)
          image_loader_source.include?('closeQuietly(bitmapStream);')
     failures << "#{image_loader_path} must close cached image decode streams"
   end
-  unless image_loader_source.include?('Log.e(TAG, "Failed to decode cached image", ex);')
+  unless image_loader_source.include?('Log.e(TAG, "Failed to decode cached image");')
     failures << "#{image_loader_path} must log cached image decode failures"
   end
   unless image_loader_source.include?('if(url == null || url.length() == 0)') &&
@@ -438,7 +467,7 @@ if File.exist?(home_activity_path)
   if home_activity_source.match?(/catch\s*\(\s*Exception\b/)
     failures << "#{home_activity_path} must not catch broad Exception while loading profile images"
   end
-  unless home_activity_source.include?('Log.e(TAG, "Failed to download profile image", ex);')
+  unless home_activity_source.include?('Log.e(TAG, "Failed to download profile image");')
     failures << "#{home_activity_path} must log profile image download IOException failures"
   end
   unless home_activity_source.include?('if(bitmap == null)')

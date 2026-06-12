@@ -95,7 +95,7 @@ public class ImageLoader {
             os = new FileOutputStream(f);
             copied = Utils.CopyStream(is, os);
         } catch (IOException ex){
-            Log.e(TAG, "Failed to load image", ex);
+            Log.e(TAG, "Failed to load image");
             deleteQuietly(f);
             return null;
         } finally {
@@ -142,7 +142,7 @@ public class ImageLoader {
         try {
             closeable.close();
         } catch (IOException ex) {
-            Log.e(TAG, "Failed to close image stream", ex);
+            Log.e(TAG, "Failed to close image stream");
         }
     }
 
@@ -184,7 +184,7 @@ public class ImageLoader {
             bitmapStream = new FileInputStream(f);
             return BitmapFactory.decodeStream(bitmapStream, null, o2);
         } catch (FileNotFoundException ex) {
-            Log.e(TAG, "Failed to decode cached image", ex);
+            Log.e(TAG, "Failed to decode cached image");
         } finally {
             closeQuietly(boundsStream);
             closeQuietly(bitmapStream);
