@@ -31,7 +31,9 @@ Priority:
 - Maintain screenshot references for visual context
 - Keep completed maintenance plans under `docs/plans`
 - Keep GitHub Actions aligned with the local Ruby `make check` baseline
+- Keep hosted checkout credential-free and run validation on every pushed branch
 - Keep vendored SDK JAR contents covered by reviewed SHA-256 digests
+- Keep credentials and user-derived content out of sensitive Logcat output
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:

@@ -37,9 +37,12 @@ Helpful reports include:
   manifest, credential-template, and cache-handling guardrails stay enforced
   before merge.
 - CI actions stay pinned by commit and run with read-only repository contents
-  permission.
+  permission and credential-free checkout.
 - Failed or non-image downloads should not leave partial payloads in the
   app-internal image cache.
+- OAuth preferences, profile fields, timelines, and tweet collections must not
+  be written to sensitive Logcat output; event and tagged failure logs remain
+  permitted when they contain no credential or user-content values.
 
 ## Mobile Privacy Notes
 

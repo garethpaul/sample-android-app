@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-12
+
+- Removed sensitive Logcat output for OAuth preference maps, profile values,
+  timelines, and rendered tweet collections, with static contract coverage.
+
 ## 2026-06-10
 
 - Deleted partial or undecodable image cache files after transport and bitmap
@@ -7,6 +12,8 @@
 - Added a least-privilege GitHub Actions workflow that installs Ruby 3.3 and
   runs `make check` with Node 24-compatible actions pinned by commit and a
   five-minute timeout.
+- Disabled checkout credential persistence, validated every pushed branch,
+  added CODEOWNERS, and made workflow policy fail closed.
 - Extended the Android contract checker and docs to require the hosted CI
   verification path.
 - Added SHA-256 integrity coverage for all four vendored SDK JARs.
