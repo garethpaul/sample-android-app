@@ -16,6 +16,7 @@ ide_metadata_plan = 'docs/plans/2026-06-09-ide-metadata-ignore.md'
 exported_state_plan = 'docs/plans/2026-06-09-manifest-exported-state.md'
 ci_plan = 'docs/plans/2026-06-10-ci-baseline.md'
 vendored_integrity_plan = 'docs/plans/2026-06-10-vendored-sdk-integrity.md'
+sensitive_log_plan = 'docs/plans/2026-06-12-sensitive-log-redaction.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -24,6 +25,7 @@ failures << "#{ide_metadata_plan} is missing" unless File.exist?(ide_metadata_pl
 failures << "#{exported_state_plan} is missing" unless File.exist?(exported_state_plan)
 failures << "#{ci_plan} is missing" unless File.exist?(ci_plan)
 failures << "#{vendored_integrity_plan} is missing" unless File.exist?(vendored_integrity_plan)
+failures << "#{sensitive_log_plan} is missing" unless File.exist?(sensitive_log_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -161,10 +163,10 @@ else
 end
 
 project_docs = {
-  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md'],
-  'VISION.md' => ['GitHub Actions'],
-  'SECURITY.md' => ['GitHub Actions', 'make check'],
-  'CHANGES.md' => ['GitHub Actions']
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat'],
+  'VISION.md' => ['GitHub Actions', 'sensitive Logcat'],
+  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat'],
+  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat']
 }
 
 project_docs.each do |path, required_phrases|
@@ -217,6 +219,26 @@ end
 
 tracked_const = `git ls-files app/src/main/java/com/example/app/Const.java`.strip
 failures << 'real Const.java must stay untracked' unless tracked_const.empty?
+
+sensitive_log_patterns = {
+  /Log\.[a-z]+\s*\([^;]*\.getAll\s*\(\s*\)/m => 'complete preference maps',
+  /Log\.[a-z]+\s*\([^;]*\b(?:username|profile_pic|access_token|access_token_secret)\b/m => 'profile or credential values',
+  /Log\.[a-z]+\s*\([^;]*\b(?:statuses|tweet_holder)\.toString\s*\(\s*\)/m => 'timeline or tweet collections',
+  /Log\.[a-z]+\s*\([^;]*\b\w+\.getMessage\s*\(\s*\)/m => 'dynamic login failure details'
+}
+
+%w[
+  app/src/main/java/com/example/app/MainActivity.java
+  app/src/main/java/com/example/app/HomeActivity.java
+].each do |path|
+  source = File.read(path)
+  source_without_comments = source.gsub(%r{/\*.*?\*/}m, '').gsub(%r{//[^\n]*}, '')
+  sensitive_log_patterns.each do |pattern, description|
+    if source_without_comments.match?(pattern)
+      failures << "#{path} must not write #{description} to sensitive Logcat output"
+    end
+  end
+end
 
 manifest_path = 'app/src/main/AndroidManifest.xml'
 if File.exist?(manifest_path)

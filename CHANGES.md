@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-12
+
+- Removed sensitive Logcat output for OAuth preference maps, profile values,
+  timelines, and rendered tweet collections, with static contract coverage.
+
 ## 2026-06-10
 
 - Deleted partial or undecodable image cache files after transport and bitmap

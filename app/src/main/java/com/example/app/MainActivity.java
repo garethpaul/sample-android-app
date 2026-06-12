@@ -141,7 +141,6 @@ public class MainActivity extends Activity {
 
         // Shared Preferences
         mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref", 0);
-        Log.v(TAG,mSharedPreferences.getAll().toString());
         /**
          * Twitter login button click event will call loginToTwitter() function
          * */
@@ -200,9 +199,7 @@ public class MainActivity extends Activity {
                     // Shared Preferences
 
                     SharedPreferences.Editor editor = twttr.edit();
-                    Log.v(TAG, username);
                     editor.putString("username", username);
-                    Log.v(TAG, profile_pic);
                     editor.putString("profile_pic", profile_pic);
                     editor.putString("screen_name", screen_name);
                     editor.putLong("userid", userID);
@@ -228,7 +225,7 @@ public class MainActivity extends Activity {
 
                 } catch (Exception e) {
                     // Check log for login errors
-                    Log.e("Twitter Login Error", "> " + e.getMessage());
+                    Log.e(TAG, "Twitter login failed");
                 }
             }
         }
