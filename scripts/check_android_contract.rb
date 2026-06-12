@@ -9,15 +9,47 @@ docs_plans = Dir['docs/plans/*.md'].sort
 canonical_plan = 'docs/plans/2026-06-08-sample-android-app-baseline.md'
 ide_metadata_plan = 'docs/plans/2026-06-09-ide-metadata-ignore.md'
 exported_state_plan = 'docs/plans/2026-06-09-manifest-exported-state.md'
+ci_plan = 'docs/plans/2026-06-10-ci-baseline.md'
+ci_workflow = '.github/workflows/check.yml'
 failures << "#{canonical_plan} is missing" unless File.exist?(canonical_plan)
 failures << "#{ide_metadata_plan} is missing" unless File.exist?(ide_metadata_plan)
 failures << "#{exported_state_plan} is missing" unless File.exist?(exported_state_plan)
+failures << "#{ci_plan} is missing" unless File.exist?(ci_plan)
+failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
 
 docs_plans.each do |plan_path|
   plan = File.read(plan_path)
   unless plan.include?('Status: Completed') && plan.include?('make check')
     failures << "#{plan_path} must record completed status and make check verification"
+  end
+end
+
+if File.exist?(ci_workflow)
+  workflow = File.read(ci_workflow)
+  unless workflow.include?('actions/checkout@v4') &&
+         workflow.include?('ruby/setup-ruby@v1') &&
+         workflow.include?('ruby-version: "3.3"') &&
+         workflow.include?('run: make check')
+    failures << "#{ci_workflow} must install Ruby 3.3 and run make check"
+  end
+end
+
+project_docs = {
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md'],
+  'VISION.md' => ['GitHub Actions'],
+  'SECURITY.md' => ['GitHub Actions', 'make check'],
+  'CHANGES.md' => ['GitHub Actions']
+}
+
+project_docs.each do |path, required_phrases|
+  if File.exist?(path)
+    text = File.read(path)
+    required_phrases.each do |phrase|
+      failures << "#{path} must document #{phrase}" unless text.include?(phrase)
+    end
+  else
+    failures << "#{path} is missing"
   end
 end
 

@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-10
+
+- Added a GitHub Actions workflow that installs Ruby 3.3 and runs `make check`.
+- Extended the Android contract checker and docs to require the hosted CI
+  verification path.
+
 ## 2026-06-09
 
 - Declared explicit manifest exported state for `MainActivity` and

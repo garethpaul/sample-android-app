@@ -33,6 +33,9 @@ Helpful reports include:
 - Dependency manifests detected: build.gradle, gradle.properties. Dependency updates should preserve lockfiles when present and avoid introducing packages without a clear maintenance reason.
 - Manifest exported state should stay explicit for the login and home
   activities so OAuth callback exposure is reviewed deliberately.
+- GitHub Actions runs `make check` for pushes and pull requests so the Android
+  manifest, credential-template, and cache-handling guardrails stay enforced
+  before merge.
 
 ## Mobile Privacy Notes
 

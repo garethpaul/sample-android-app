@@ -29,6 +29,7 @@ Priority:
 - Avoid optional location and shared-storage permissions in the default sample
 - Maintain screenshot references for visual context
 - Keep completed maintenance plans under `docs/plans`
+- Keep GitHub Actions aligned with the local Ruby `make check` baseline
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:
@@ -44,6 +45,7 @@ Contribution rules:
 - Do not commit OAuth secrets, ad-network keys, or user data.
 - Include emulator or device notes for behavior changes.
 - Keep production-readiness caveats visible.
+- Keep `.github/workflows/check.yml` in sync with the local static contract.
 
 ## Security And Responsible Use
 

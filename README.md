@@ -90,6 +90,8 @@ secrets.
   decodes, and show the placeholder image on failure.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - The static checker also requires completed canonical plans under `docs/plans`.
+- GitHub Actions installs Ruby 3.3 and runs `make check` for pushes and pull
+  requests.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -132,6 +134,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   ignore coverage.
 - See `docs/plans/2026-06-09-manifest-exported-state.md` for explicit
   activity exported-state coverage.
+- See `docs/plans/2026-06-10-ci-baseline.md` for the hosted GitHub Actions
+  baseline.
 
 ## Contributing
 
