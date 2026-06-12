@@ -96,6 +96,7 @@ public class ImageLoader {
             copied = Utils.CopyStream(is, os);
         } catch (IOException ex){
             Log.e(TAG, "Failed to load image", ex);
+            deleteQuietly(f);
             return null;
         } finally {
             closeQuietly(os);
@@ -110,8 +111,10 @@ public class ImageLoader {
         }
 
         Bitmap bitmap = decodeFile(f);
-        if(bitmap == null)
+        if(bitmap == null) {
+            deleteQuietly(f);
             return null;
+        }
 
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                 bitmap.getHeight(), Config.ARGB_8888);

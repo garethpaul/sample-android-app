@@ -2,6 +2,11 @@
 # frozen_string_literal: true
 
 require 'rexml/document'
+require 'digest'
+require 'yaml'
+
+ROOT = File.expand_path('..', __dir__)
+Dir.chdir(ROOT)
 
 failures = []
 
@@ -10,12 +15,17 @@ canonical_plan = 'docs/plans/2026-06-08-sample-android-app-baseline.md'
 ide_metadata_plan = 'docs/plans/2026-06-09-ide-metadata-ignore.md'
 exported_state_plan = 'docs/plans/2026-06-09-manifest-exported-state.md'
 ci_plan = 'docs/plans/2026-06-10-ci-baseline.md'
+vendored_integrity_plan = 'docs/plans/2026-06-10-vendored-sdk-integrity.md'
 ci_workflow = '.github/workflows/check.yml'
+workflow_dir = '.github/workflows'
+codeowners = '.github/CODEOWNERS'
 failures << "#{canonical_plan} is missing" unless File.exist?(canonical_plan)
 failures << "#{ide_metadata_plan} is missing" unless File.exist?(ide_metadata_plan)
 failures << "#{exported_state_plan} is missing" unless File.exist?(exported_state_plan)
 failures << "#{ci_plan} is missing" unless File.exist?(ci_plan)
+failures << "#{vendored_integrity_plan} is missing" unless File.exist?(vendored_integrity_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
+failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
 
 docs_plans.each do |plan_path|
@@ -27,12 +37,127 @@ end
 
 if File.exist?(ci_workflow)
   workflow = File.read(ci_workflow)
-  unless workflow.include?('actions/checkout@v4') &&
-         workflow.include?('ruby/setup-ruby@v1') &&
+  unless workflow.include?('actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10') &&
+         workflow.include?('ruby/setup-ruby@12fd324f1d0b43274fdc8130f6980590a667c455') &&
          workflow.include?('ruby-version: "3.3"') &&
+         workflow.include?('runs-on: ubuntu-24.04') &&
+         workflow.include?('concurrency:') &&
+         workflow.include?('cancel-in-progress: true') &&
+         workflow.include?('permissions:') &&
+         workflow.include?('contents: read') &&
+         workflow.include?('persist-credentials: false') &&
+         workflow.include?('timeout-minutes: 5') &&
+         workflow.include?("  pull_request:\n") &&
+         workflow.include?("  push:\n") &&
+         workflow.include?('workflow_dispatch:') &&
          workflow.include?('run: make check')
-    failures << "#{ci_workflow} must install Ruby 3.3 and run make check"
+    failures << "#{ci_workflow} must keep the pinned, least-privilege Ruby 3.3 check baseline"
   end
+  if workflow.match?(/^\s+(?:branches|branches-ignore|paths|paths-ignore|tags|tags-ignore):/)
+    failures << "#{ci_workflow} must validate every pushed branch and pull request"
+  end
+  failures << "#{ci_workflow} must not conditionally skip verification" if workflow.match?(/^\s+if:/)
+  failures << "#{ci_workflow} must not allow verification failures" if workflow.include?('continue-on-error')
+  failures << "#{ci_workflow} must not grant write permissions" if workflow.match?(/^\s*[\w-]+:\s*write\s*$/)
+  failures << "#{ci_workflow} must include one checkout action" unless workflow.scan(/actions\/checkout@/).length == 1
+  failures << "#{ci_workflow} must include one Ruby setup action" unless workflow.scan(/ruby\/setup-ruby@/).length == 1
+  unless workflow.scan('persist-credentials: false').length == 1
+    failures << "#{ci_workflow} must disable checkout credential persistence exactly once"
+  end
+  workflow.scan(/^\s*uses:\s*([^@\s]+)@([^\s#]+)/).each do |action, revision|
+    unless revision.match?(/\A[a-f0-9]{40}\z/)
+      failures << "#{ci_workflow} action #{action} must be pinned to a full commit SHA"
+    end
+  end
+
+  begin
+    workflow_config = YAML.safe_load(
+      workflow,
+      permitted_classes: [],
+      permitted_symbols: [],
+      aliases: true
+    )
+    workflow_events = workflow_config['on'] || workflow_config[true]
+    check_job = workflow_config.dig('jobs', 'check')
+    steps = check_job.is_a?(Hash) && check_job['steps'].is_a?(Array) ? check_job['steps'] : []
+    checkout_steps = steps.select { |step| step['uses'].to_s.start_with?('actions/checkout@') }
+    ruby_steps = steps.select { |step| step['uses'].to_s.start_with?('ruby/setup-ruby@') }
+    run_steps = steps.select { |step| step['run'] == 'make check' }
+
+    unless workflow_events.is_a?(Hash) &&
+           workflow_events.key?('pull_request') &&
+           workflow_events.key?('push') &&
+           workflow_events.key?('workflow_dispatch') &&
+           workflow_events['pull_request'].nil? &&
+           workflow_events['push'].nil?
+      failures << "#{ci_workflow} must structurally enable unfiltered push, pull request, and manual checks"
+    end
+    unless workflow_config['permissions'] == { 'contents' => 'read' }
+      failures << "#{ci_workflow} must structurally keep top-level contents read-only permissions"
+    end
+    unless check_job.is_a?(Hash) &&
+           check_job['runs-on'] == 'ubuntu-24.04' &&
+           check_job['timeout-minutes'] == 5 &&
+           !check_job.key?('if') &&
+           !check_job.key?('continue-on-error') &&
+           !check_job.key?('permissions')
+      failures << "#{ci_workflow} must structurally keep the bounded, unconditional check job"
+    end
+    unless checkout_steps.length == 1 &&
+           checkout_steps.first['uses'] == 'actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10' &&
+           checkout_steps.first.fetch('with', {})['persist-credentials'] == false
+      failures << "#{ci_workflow} must structurally keep one pinned credential-free checkout step"
+    end
+    unless ruby_steps.length == 1 &&
+           ruby_steps.first['uses'] == 'ruby/setup-ruby@12fd324f1d0b43274fdc8130f6980590a667c455' &&
+           ruby_steps.first.fetch('with', {})['ruby-version'] == '3.3'
+      failures << "#{ci_workflow} must structurally keep one pinned Ruby 3.3 setup step"
+    end
+    unless steps.length == 3 &&
+           steps[0] == checkout_steps.first &&
+           steps[1] == ruby_steps.first &&
+           steps[2] == run_steps.first &&
+           steps.none? { |step| step.key?('if') || step.key?('continue-on-error') }
+      failures << "#{ci_workflow} must structurally keep exactly checkout, Ruby setup, and make check steps"
+    end
+  rescue Psych::Exception, NoMethodError, TypeError => error
+    failures << "#{ci_workflow} must parse as the expected workflow structure: #{error.message}"
+  end
+end
+
+workflow_files = Dir[File.join(workflow_dir, '*.{yml,yaml}')].sort
+unless workflow_files == [ci_workflow]
+  failures << "#{workflow_dir} must contain only check.yml"
+end
+
+if File.exist?(codeowners) && File.read(codeowners).strip != '* @garethpaul'
+  failures << "#{codeowners} must assign all paths to @garethpaul"
+end
+
+vendored_manifest = 'app/libs/SHA256SUMS'
+vendored_jars = Dir['app/libs/*.jar'].sort
+if File.exist?(vendored_manifest)
+  expected_digests = {}
+  File.readlines(vendored_manifest, chomp: true).each do |line|
+    match = line.match(/\A([a-f0-9]{64})  (app\/libs\/[^\s]+\.jar)\z/)
+    if match
+      failures << "#{vendored_manifest} lists #{match[2]} more than once" if expected_digests.key?(match[2])
+      expected_digests[match[2]] = match[1]
+    else
+      failures << "#{vendored_manifest} contains invalid entry #{line.inspect}"
+    end
+  end
+  unless expected_digests.keys.sort == vendored_jars
+    failures << "#{vendored_manifest} must list every vendored JAR exactly once"
+  end
+  vendored_jars.each do |jar|
+    expected = expected_digests[jar]
+    if expected && Digest::SHA256.file(jar).hexdigest != expected
+      failures << "#{jar} does not match its checked-in SHA-256 digest"
+    end
+  end
+else
+  failures << "#{vendored_manifest} is missing"
 end
 
 project_docs = {
@@ -251,6 +376,12 @@ if File.exist?(image_loader_path)
   end
   unless image_loader_source.include?('Log.e(TAG, "Failed to load image", ex);')
     failures << "#{image_loader_path} must log image load IOException failures"
+  end
+  unless image_loader_source.match?(/catch\s*\(\s*IOException\s+ex\s*\)\s*\{[^}]*Log\.e\(TAG, "Failed to load image", ex\);[^}]*deleteQuietly\(f\);[^}]*return null;/m)
+    failures << "#{image_loader_path} must delete partial cache files after image download exceptions"
+  end
+  unless image_loader_source.match?(/Bitmap bitmap = decodeFile\(f\);\s*if\s*\(bitmap == null\)\s*\{\s*deleteQuietly\(f\);\s*return null;\s*\}/m)
+    failures << "#{image_loader_path} must delete downloaded cache files that fail bitmap decoding"
   end
   unless image_loader_source.include?('if(bitmap == null)')
     failures << "#{image_loader_path} must guard failed bitmap decodes before rounding images"

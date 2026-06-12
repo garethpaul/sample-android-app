@@ -3,11 +3,6 @@
 <!-- README-OVERVIEW-IMAGE -->
 ![Project overview](docs/readme-overview.svg)
 
-## Device Preview
-
-<!-- DEVICE-PREVIEW-IMAGE -->
-![Device preview](docs/device-preview.svg)
-
 ## Overview
 
 `garethpaul/sample-android-app` is an Android application or sample. Sample Android App
@@ -82,6 +77,8 @@ secrets.
   logger and failed decodes are guarded before rounded bitmap rendering.
 - `make check` also verifies image cache writes report completion and partial
   cache files are deleted after failed copies.
+- `make check` also verifies download exceptions and invalid downloaded image
+  payloads do not leave unusable cache files behind.
 - `make check` also verifies cached image decode streams are closed and decode
   failures are logged.
 - `make check` also verifies null or empty image URLs show the placeholder
@@ -90,8 +87,11 @@ secrets.
   decodes, and show the placeholder image on failure.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - The static checker also requires completed canonical plans under `docs/plans`.
-- GitHub Actions installs Ruby 3.3 and runs `make check` for pushes and pull
-  requests.
+- GitHub Actions installs Ruby 3.3 and runs `make check` with pinned actions,
+  read-only permissions, credential-free checkout, every-branch coverage, and
+  a bounded timeout.
+- `app/libs/SHA256SUMS` records and verifies every vendored advertising and
+  social SDK JAR without attempting to revive the archival Android build.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -136,6 +136,10 @@ When the required SDK or runtime is unavailable, use static checks and source re
   activity exported-state coverage.
 - See `docs/plans/2026-06-10-ci-baseline.md` for the hosted GitHub Actions
   baseline.
+- See `docs/plans/2026-06-10-vendored-sdk-integrity.md` for the vendored JAR
+  integrity boundary.
+- See `docs/plans/2026-06-10-image-cache-failure-cleanup.md` for transport and
+  decode failure cache cleanup.
 
 ## Contributing
 

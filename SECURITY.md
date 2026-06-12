@@ -36,12 +36,20 @@ Helpful reports include:
 - GitHub Actions runs `make check` for pushes and pull requests so the Android
   manifest, credential-template, and cache-handling guardrails stay enforced
   before merge.
+- CI actions stay pinned by commit and run with read-only repository contents
+  permission and credential-free checkout.
+- Failed or non-image downloads should not leave partial payloads in the
+  app-internal image cache.
 
 ## Mobile Privacy Notes
 
 If this project requests device permissions such as location, camera, microphone, contacts, Bluetooth, health data, or local storage access, reports should describe the permission involved and whether sensitive data can be accessed, persisted, or transmitted unexpectedly. Please avoid testing against real third-party user data or accounts you do not control.
 
 ## Dependency and Supply Chain Security
+
+The archived JARs under `app/libs` are covered by `app/libs/SHA256SUMS` and the
+static contract. A digest change requires explicit review; it does not imply
+that these obsolete SDKs are safe for new production use.
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 

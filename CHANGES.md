@@ -2,9 +2,18 @@
 
 ## 2026-06-10
 
-- Added a GitHub Actions workflow that installs Ruby 3.3 and runs `make check`.
+- Deleted partial or undecodable image cache files after transport and bitmap
+  decode failures, with static contract coverage.
+- Added a least-privilege GitHub Actions workflow that installs Ruby 3.3 and
+  runs `make check` with Node 24-compatible actions pinned by commit and a
+  five-minute timeout.
+- Disabled checkout credential persistence, validated every pushed branch,
+  added CODEOWNERS, and made workflow policy fail closed.
 - Extended the Android contract checker and docs to require the hosted CI
   verification path.
+- Added SHA-256 integrity coverage for all four vendored SDK JARs.
+- Fixed hosted static validation to Ubuntu 24.04 with concurrency cancellation.
+- Made the Makefile and checker independent of the caller's directory.
 
 ## 2026-06-09
 

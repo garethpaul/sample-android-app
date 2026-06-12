@@ -23,6 +23,7 @@ Priority:
 - Keep image cache data in app-internal storage
 - Keep image-load failures observable without crashing bitmap rendering
 - Keep partial image cache writes from being decoded
+- Keep failed and undecodable image downloads out of the cache
 - Keep cached image decode streams closed after bitmap reads
 - Keep empty image URLs placeholder-backed without cache lookups
 - Keep profile image failures observable and placeholder-backed
@@ -30,6 +31,8 @@ Priority:
 - Maintain screenshot references for visual context
 - Keep completed maintenance plans under `docs/plans`
 - Keep GitHub Actions aligned with the local Ruby `make check` baseline
+- Keep hosted checkout credential-free and run validation on every pushed branch
+- Keep vendored SDK JAR contents covered by reviewed SHA-256 digests
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:
