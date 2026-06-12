@@ -87,6 +87,8 @@ secrets.
   decodes, and show the placeholder image on failure.
 - `make check` also rejects sensitive Logcat output containing OAuth preference
   maps, profile values, timelines, or rendered tweet collections.
+- `make check` also rejects caught exception messages, throwable payloads, and
+  stack traces while preserving fixed tagged failure events.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - The static checker also requires completed canonical plans under `docs/plans`.
 - GitHub Actions installs Ruby 3.3 and runs `make check` with pinned actions,
@@ -144,6 +146,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   decode failure cache cleanup.
 - See `docs/plans/2026-06-12-sensitive-log-redaction.md` for the credential and
   user-content logging boundary.
+- See `docs/plans/2026-06-12-exception-log-redaction.md` for the exception detail
+  and stack-trace logging boundary.
 
 ## Contributing
 

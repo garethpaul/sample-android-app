@@ -185,7 +185,7 @@ public class HomeActivity extends Activity {
                 Log.v(TAG,"Attempting to bring the tweets home");
                 bringTweets();
             } catch (TwitterException ex) {
-                Log.e(TAG, "Issue bringing tweets back home", ex);
+                Log.e(TAG, "Issue bringing tweets back home");
             }
             return null;
         }
@@ -279,14 +279,14 @@ public class HomeActivity extends Activity {
                 bitmap = BitmapFactory.
                         decodeStream(stream, null, bmOptions);
             } catch (IOException ex) {
-                Log.e(TAG, "Failed to download profile image", ex);
+                Log.e(TAG, "Failed to download profile image");
                 return null;
             } finally {
                 if(stream != null) {
                     try {
                         stream.close();
                     } catch (IOException ex) {
-                        Log.e(TAG, "Failed to close profile image stream", ex);
+                        Log.e(TAG, "Failed to close profile image stream");
                     }
                 }
             }

@@ -4,6 +4,8 @@
 
 - Removed sensitive Logcat output for OAuth preference maps, profile values,
   timelines, and rendered tweet collections, with static contract coverage.
+- Removed caught exception payloads and stack traces from Logcat while
+  retaining fixed tagged failure events, with rename-resistant contract checks.
 
 ## 2026-06-10
 
