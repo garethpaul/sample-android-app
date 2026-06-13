@@ -38,6 +38,8 @@ Priority:
 - Keep credentials and user-derived content out of sensitive Logcat output
 - Keep OAuth tokens in private auth preferences and clear both auth and profile
   preferences before logout navigation
+- Keep login flows able to correlate OAuth callback request tokens with the
+  active request and exact callback origin before exchange
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:

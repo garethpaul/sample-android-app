@@ -92,6 +92,9 @@ secrets.
 - `make check` also requires OAuth tokens to stay only in private auth
   preferences and logout to clear both auth and profile preferences before
   returning to the login screen.
+- `make check` also requires the login flow to correlate OAuth callback request
+  tokens with the active request token, exact scheme and host, and a nonempty
+  verifier before access-token exchange.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - The static checker also requires completed canonical plans under `docs/plans`.
 - GitHub Actions installs Ruby 3.3 and runs `make check` with pinned actions,
@@ -153,6 +156,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   and stack-trace logging boundary.
 - See `docs/plans/2026-06-13-logout-credential-purge.md` for the dedicated OAuth
   storage and logout credential-purge contract.
+- See `docs/plans/2026-06-13-oauth-callback-correlation.md` for exact-origin and
+  request-token callback correlation before exchange.
 
 ## Contributing
 

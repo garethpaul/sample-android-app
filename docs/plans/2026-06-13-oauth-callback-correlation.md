@@ -1,6 +1,6 @@
 # OAuth Callback Correlation
 
-## Status: Planned
+## Status: Completed
 
 ## Context
 
@@ -83,6 +83,28 @@ documented legacy Gradle skip.
 
 This change does not persist request tokens across process death, migrate from
 OAuth 1.0a, update the archived Twitter SDK, or claim emulator/device coverage.
+
+## Work Completed
+
+- Added a side-effect-free callback validator for exact scheme and host,
+  nonnull request state, callback-token equality, and nonblank verifier.
+- Rejected data-bearing launches that fail correlation before access-token
+  exchange with a fixed non-sensitive log event.
+- Removed callback URL prefix matching from the login flow.
+- Added fail-closed source, ordering, documentation, and completed-plan
+  contracts to the canonical Android checker.
+- Synchronized README, vision, security, and change-history documentation.
+
+## Verification
+
+- `ruby scripts/check_android_contract.rb`
+- `make check` passed the Android contract with only the documented legacy
+  Gradle SDK skip.
+- The root-independent Make invocation passed with the same documented skip.
+- Ten focused null-state, scheme, host, callback-token, verifier, bypass,
+  prefix, logging, documentation, and completed-plan mutations were rejected.
+- Manifest XML, workflow YAML, vendored JAR digests, Java delimiter, generated
+  artifact, secret-signature, and `git diff --check` audits are required.
 
 ## References
 
