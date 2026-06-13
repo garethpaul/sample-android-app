@@ -36,6 +36,8 @@ Priority:
 - Keep hosted checkout credential-free and run validation on every pushed branch
 - Keep vendored SDK JAR contents covered by reviewed SHA-256 digests
 - Keep credentials and user-derived content out of sensitive Logcat output
+- Keep OAuth tokens in private auth preferences and clear both auth and profile
+  preferences before logout navigation
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:

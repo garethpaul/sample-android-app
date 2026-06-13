@@ -17,6 +17,7 @@ exported_state_plan = 'docs/plans/2026-06-09-manifest-exported-state.md'
 ci_plan = 'docs/plans/2026-06-10-ci-baseline.md'
 vendored_integrity_plan = 'docs/plans/2026-06-10-vendored-sdk-integrity.md'
 sensitive_log_plan = 'docs/plans/2026-06-12-sensitive-log-redaction.md'
+logout_credential_plan = 'docs/plans/2026-06-13-logout-credential-purge.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -26,6 +27,7 @@ failures << "#{exported_state_plan} is missing" unless File.exist?(exported_stat
 failures << "#{ci_plan} is missing" unless File.exist?(ci_plan)
 failures << "#{vendored_integrity_plan} is missing" unless File.exist?(vendored_integrity_plan)
 failures << "#{sensitive_log_plan} is missing" unless File.exist?(sensitive_log_plan)
+failures << "#{logout_credential_plan} is missing" unless File.exist?(logout_credential_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -163,17 +165,18 @@ else
 end
 
 project_docs = {
-  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages'],
-  'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception'],
-  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects'],
-  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads']
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', logout_credential_plan],
+  'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences'],
+  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences'],
+  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences']
 }
 
 project_docs.each do |path, required_phrases|
   if File.exist?(path)
     text = File.read(path)
+    normalized_text = text.gsub(/\s+/, ' ')
     required_phrases.each do |phrase|
-      failures << "#{path} must document #{phrase}" unless text.include?(phrase)
+      failures << "#{path} must document #{phrase}" unless normalized_text.include?(phrase)
     end
   else
     failures << "#{path} is missing"
@@ -267,6 +270,56 @@ Dir['app/src/main/java/**/*.java'].sort.each do |path|
       failures << "#{path} must not write caught exception #{variable} details to Logcat"
     end
   end
+end
+
+main_activity_path = 'app/src/main/java/com/example/app/MainActivity.java'
+home_activity_path = 'app/src/main/java/com/example/app/HomeActivity.java'
+main_activity_source = File.read(main_activity_path)
+home_activity_source = File.read(home_activity_path)
+main_activity_code = main_activity_source.gsub(%r{/\*.*?\*/}m, '').gsub(%r{//[^\n]*}, '')
+home_activity_code = home_activity_source.gsub(%r{/\*.*?\*/}m, '').gsub(%r{//[^\n]*}, '')
+
+unless main_activity_code.include?('static final String AUTH_PREFS_NAME = "MyPref";') &&
+       main_activity_code.include?('static final String PROFILE_PREFS_NAME = "TwitterProfile";') &&
+       main_activity_code.include?('static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";') &&
+       main_activity_code.include?('static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";') &&
+       main_activity_code.include?('static final String PREF_KEY_TWITTER_LOGIN = "boolean";')
+  failures << "#{main_activity_path} must keep one shared set of auth and profile preference constants"
+end
+
+session_clear = main_activity_code.match(
+  /static\s+boolean\s+clearTwitterSession\s*\(\s*android\.content\.Context\s+context\s*\)\s*\{(?<body>.*?)^    \}/m
+)
+unless session_clear &&
+       session_clear[:body].include?('PROFILE_PREFS_NAME, MODE_PRIVATE') &&
+       session_clear[:body].include?('AUTH_PREFS_NAME, MODE_PRIVATE') &&
+       session_clear[:body].scan(/\.edit\(\)\.clear\(\)\.commit\(\)/).length == 2 &&
+       session_clear[:body].include?('return profileCleared && authCleared;')
+  failures << "#{main_activity_path} must synchronously clear both profile and auth preferences on logout"
+end
+
+unless main_activity_code.match?(/if\s*\(\s*!clearTwitterSession\(getApplicationContext\(\)\)\s*\)\s*\{\s*Log\.e\(TAG, "Failed to clear Twitter session"\);\s*return;/m) &&
+       home_activity_code.match?(/if\s*\(\s*!MainActivity\.clearTwitterSession\(getApplicationContext\(\)\)\s*\)\s*\{\s*Log\.e\(TAG, "Failed to clear Twitter session"\);\s*return;/m)
+  failures << 'both logout flows must stop navigation when credential purge fails'
+end
+
+if main_activity_code.include?('editor.putString("token"') ||
+   main_activity_code.include?('editor.putString("secret"') ||
+   home_activity_code.include?('getString("token"') ||
+   home_activity_code.include?('getString("secret"')
+  failures << 'OAuth tokens must not be duplicated into profile preferences'
+end
+
+unless home_activity_code.include?('MainActivity.AUTH_PREFS_NAME, Context.MODE_PRIVATE') &&
+       home_activity_code.include?('MainActivity.PREF_KEY_OAUTH_TOKEN, ""') &&
+       home_activity_code.include?('MainActivity.PREF_KEY_OAUTH_SECRET, ""') &&
+       home_activity_code.include?('MainActivity.PROFILE_PREFS_NAME, Context.MODE_PRIVATE')
+  failures << "#{home_activity_path} must read profile and OAuth values from their dedicated private stores"
+end
+
+if home_activity_code.match?(/PREF_KEY_(?:OAUTH_TOKEN|OAUTH_SECRET|TWITTER_LOGIN)\s*=\s*""/) ||
+   home_activity_code.match?(/getSharedPreferences\s*\([^,]+,\s*0\s*\)/)
+  failures << "#{home_activity_path} must not restore empty preference keys or numeric preference modes"
 end
 
 manifest_path = 'app/src/main/AndroidManifest.xml'
