@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-13
+
+- Kept OAuth tokens out of profile metadata and made logout clear both auth and
+  profile preferences before returning to the login screen.
+
 ## 2026-06-12
 
 - Removed sensitive Logcat output for OAuth preference maps, profile values,

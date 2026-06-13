@@ -25,7 +25,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -75,14 +74,8 @@ public class HomeActivity extends Activity {
 
     private static String TWITTER_CONSUMER_KEY = Const.TWITTER_CONSUMER_KEY;
     private static String TWITTER_CONSUMER_SECRET = Const.TWITTER_CONSUMER_SECRET;
-    private static String PREF_KEY_OAUTH_TOKEN = "";
-    private static String PREF_KEY_OAUTH_SECRET = "";
-    private static String PREF_KEY_TWITTER_LOGIN = "";
-
     // setup logging
     private static String TAG = Const.TAG;
-    private static String PREFS_NAME = "TwitterProfile";
-    private static String P_NAME = "MyPref";
 
     // Statuses
     List<Status> statuses = new ArrayList<Status>();
@@ -113,7 +106,8 @@ public class HomeActivity extends Activity {
         moPubView.setAdUnitId(Const.MoPubMiniBannerId);
         moPubView.loadAd();
 
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences settings = getSharedPreferences(
+                MainActivity.PROFILE_PREFS_NAME, Context.MODE_PRIVATE);
         // set username to text
         String username = settings.getString("username", "");
         mTextView = (TextView) findViewById(R.id.name);
@@ -164,14 +158,10 @@ public class HomeActivity extends Activity {
 
     private void logoutFromTwitter() {
         Log.v(TAG, "LOGOUT Please");
-        SharedPreferences prefs = getSharedPreferences(P_NAME, 0);
-        SharedPreferences.Editor e = prefs.edit();
-        e.remove(PREF_KEY_OAUTH_TOKEN);
-        e.remove(PREF_KEY_OAUTH_SECRET);
-        e.remove(PREF_KEY_TWITTER_LOGIN);
-        e.clear();
-        e.putBoolean(PREF_KEY_TWITTER_LOGIN, false);
-        e.commit();
+        if (!MainActivity.clearTwitterSession(getApplicationContext())) {
+            Log.e(TAG, "Failed to clear Twitter session");
+            return;
+        }
         Intent goToNextActivity = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(goToNextActivity);
 
@@ -208,10 +198,13 @@ public class HomeActivity extends Activity {
             builder.setIncludeMyRetweetEnabled(false);
             builder.setIncludeRTsEnabled(false);
             // Access Token
-            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, 0);
-            String access_token = prefs.getString("token", "");
+            SharedPreferences prefs = getSharedPreferences(
+                    MainActivity.AUTH_PREFS_NAME, Context.MODE_PRIVATE);
+            String access_token = prefs.getString(
+                    MainActivity.PREF_KEY_OAUTH_TOKEN, "");
             // Access Token Secret
-            String access_token_secret = prefs.getString("secret", "");
+            String access_token_secret = prefs.getString(
+                    MainActivity.PREF_KEY_OAUTH_SECRET, "");
 
             //
             // Try to retrieve some tweets.
