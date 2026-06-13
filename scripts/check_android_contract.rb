@@ -18,6 +18,7 @@ ci_plan = 'docs/plans/2026-06-10-ci-baseline.md'
 vendored_integrity_plan = 'docs/plans/2026-06-10-vendored-sdk-integrity.md'
 sensitive_log_plan = 'docs/plans/2026-06-12-sensitive-log-redaction.md'
 logout_credential_plan = 'docs/plans/2026-06-13-logout-credential-purge.md'
+oauth_callback_plan = 'docs/plans/2026-06-13-oauth-callback-correlation.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -28,6 +29,7 @@ failures << "#{ci_plan} is missing" unless File.exist?(ci_plan)
 failures << "#{vendored_integrity_plan} is missing" unless File.exist?(vendored_integrity_plan)
 failures << "#{sensitive_log_plan} is missing" unless File.exist?(sensitive_log_plan)
 failures << "#{logout_credential_plan} is missing" unless File.exist?(logout_credential_plan)
+failures << "#{oauth_callback_plan} is missing" unless File.exist?(oauth_callback_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -165,10 +167,10 @@ else
 end
 
 project_docs = {
-  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', logout_credential_plan],
-  'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences'],
-  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences'],
-  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences']
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', logout_credential_plan, oauth_callback_plan],
+  'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences', 'correlate OAuth callback request tokens'],
+  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens'],
+  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens']
 }
 
 project_docs.each do |path, required_phrases|
@@ -320,6 +322,29 @@ end
 if home_activity_code.match?(/PREF_KEY_(?:OAUTH_TOKEN|OAUTH_SECRET|TWITTER_LOGIN)\s*=\s*""/) ||
    home_activity_code.match?(/getSharedPreferences\s*\([^,]+,\s*0\s*\)/)
   failures << "#{home_activity_path} must not restore empty preference keys or numeric preference modes"
+end
+
+callback_validator = main_activity_code.match(
+  /static\s+boolean\s+isExpectedOAuthCallback\s*\(\s*Uri\s+uri\s*,\s*RequestToken\s+expectedRequestToken\s*\)\s*\{(?<body>.*?)^    \}/m
+)
+unless callback_validator &&
+       callback_validator[:body].include?('uri == null || expectedRequestToken == null') &&
+       callback_validator[:body].include?('Uri.parse(TWITTER_CALLBACK_URL)') &&
+       callback_validator[:body].include?('getQueryParameter(URL_TWITTER_OAUTH_TOKEN)') &&
+       callback_validator[:body].include?('getQueryParameter(URL_TWITTER_OAUTH_VERIFIER)') &&
+       callback_validator[:body].include?('configuredCallback.getScheme().equals(uri.getScheme())') &&
+       callback_validator[:body].include?('configuredCallback.getHost().equals(uri.getHost())') &&
+       callback_validator[:body].include?('expectedToken.equals(callbackToken)') &&
+       callback_validator[:body].include?('verifier.trim().length() > 0')
+  failures << "#{main_activity_path} must correlate exact-origin OAuth callbacks with the active request token and verifier"
+end
+
+callback_gate = main_activity_code.index('if (!isExpectedOAuthCallback(uri, requestToken))')
+access_token_exchange = main_activity_code.index('twitter.getOAuthAccessToken(')
+unless callback_gate && access_token_exchange && callback_gate < access_token_exchange &&
+       main_activity_code.include?('Log.e(TAG, "Rejected invalid Twitter callback");') &&
+       !main_activity_code.include?('uri.toString().startsWith(TWITTER_CALLBACK_URL)')
+  failures << "#{main_activity_path} must reject invalid OAuth callbacks before token exchange without prefix matching"
 end
 
 manifest_path = 'app/src/main/AndroidManifest.xml'

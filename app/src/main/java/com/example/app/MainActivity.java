@@ -57,6 +57,7 @@ public class MainActivity extends Activity {
     static final String AUTH_PREFS_NAME = "MyPref";
     static final String PROFILE_PREFS_NAME = "TwitterProfile";
     static final String TWITTER_CALLBACK_URL = Const.TWITTER_CALLBACK_URL;
+    static final String URL_TWITTER_OAUTH_TOKEN = "oauth_token";
     static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
 
 
@@ -175,7 +176,12 @@ public class MainActivity extends Activity {
         if (!isTwitterLoggedInAlready()) {
 
             Uri uri = getIntent().getData();
-            if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
+            if (uri != null) {
+                if (!isExpectedOAuthCallback(uri, requestToken)) {
+                    Log.e(TAG, "Rejected invalid Twitter callback");
+                    return;
+                }
+
                 Log.v(TAG, "start verification");
                 // oAuth verifier
                 String verifier = uri
@@ -299,6 +305,24 @@ public class MainActivity extends Activity {
         boolean profileCleared = profilePreferences.edit().clear().commit();
         boolean authCleared = authPreferences.edit().clear().commit();
         return profileCleared && authCleared;
+    }
+
+    static boolean isExpectedOAuthCallback(Uri uri, RequestToken expectedRequestToken) {
+        if (uri == null || expectedRequestToken == null) {
+            return false;
+        }
+
+        Uri configuredCallback = Uri.parse(TWITTER_CALLBACK_URL);
+        String callbackToken = uri.getQueryParameter(URL_TWITTER_OAUTH_TOKEN);
+        String verifier = uri.getQueryParameter(URL_TWITTER_OAUTH_VERIFIER);
+        String expectedToken = expectedRequestToken.getToken();
+
+        return configuredCallback.getScheme().equals(uri.getScheme())
+                && configuredCallback.getHost().equals(uri.getHost())
+                && expectedToken != null
+                && expectedToken.equals(callbackToken)
+                && verifier != null
+                && verifier.trim().length() > 0;
     }
 
     /**
