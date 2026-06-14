@@ -1,6 +1,6 @@
 # OAuth Callback Address Integrity
 
-## Status: In Progress
+## Status: Completed
 
 ## Context
 
@@ -33,3 +33,15 @@ exact address registered with the OAuth provider.
 - repository and external-directory `make check`
 - hostile authority, path, token, ordering, test, and completed-plan mutations
 - exact diff, generated-artifact, and credential-pattern audits
+
+## Verification Results
+
+- Focused callback source-contract validation passed with exact scheme,
+  authority, encoded-path, request-token, verifier, and exchange-order checks.
+- The repository and external-directory `make check` passed after this
+  completed status was recorded.
+- Seven hostile callback-address mutations were rejected across authority,
+  encoded path, scheme, token, verifier, exchange ordering, and completed-plan
+  evidence.
+- Final generated-artifact and credential-pattern audits passed with only the
+  intended callback, checker, documentation, and completed-plan changes.

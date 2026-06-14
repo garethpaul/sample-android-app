@@ -318,7 +318,8 @@ public class MainActivity extends Activity {
         String expectedToken = expectedRequestToken.getToken();
 
         return configuredCallback.getScheme().equals(uri.getScheme())
-                && configuredCallback.getHost().equals(uri.getHost())
+                && configuredCallback.getAuthority().equals(uri.getAuthority())
+                && configuredCallback.getEncodedPath().equals(uri.getEncodedPath())
                 && expectedToken != null
                 && expectedToken.equals(callbackToken)
                 && verifier != null
