@@ -186,12 +186,14 @@ public class MainActivity extends Activity {
                 // oAuth verifier
                 String verifier = uri
                         .getQueryParameter(URL_TWITTER_OAUTH_VERIFIER);
+                RequestToken callbackRequestToken = requestToken;
+                requestToken = null;
 
                 try {
 
                     // Get the access token
                     AccessToken accessToken = twitter.getOAuthAccessToken(
-                            requestToken, verifier);
+                            callbackRequestToken, verifier);
 
                     // Getting user details from twitter
                     // For now i am getting his name only

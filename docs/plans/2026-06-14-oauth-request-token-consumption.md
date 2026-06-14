@@ -1,6 +1,6 @@
 # Consume OAuth Request Tokens Once
 
-## Status: Planned
+## Status: Completed
 
 ## Context
 
@@ -33,3 +33,14 @@ in-memory request token eligible for replay.
 - Do not change OAuth endpoints, callback address, consumer credentials,
   preference names, manifest exposure, or legacy SDK requirements.
 - Do not merge or close stacked pull requests without explicit authorization.
+
+## Verification Results
+
+- The focused Android source-contract validation passed.
+- The repository and external-directory `make check` passed; the archival
+  Gradle build remained on its explicit documented skip path because no
+  compatible Android SDK was configured.
+- Five hostile request-token mutations were rejected across token copying,
+  clearing, exchange argument, documentation, and completed-plan evidence.
+- Final exact-diff, generated-artifact, conflict-marker, and credential-pattern
+  audits found only intended paths and no secrets.
