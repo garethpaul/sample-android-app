@@ -19,6 +19,7 @@ vendored_integrity_plan = 'docs/plans/2026-06-10-vendored-sdk-integrity.md'
 sensitive_log_plan = 'docs/plans/2026-06-12-sensitive-log-redaction.md'
 logout_credential_plan = 'docs/plans/2026-06-13-logout-credential-purge.md'
 oauth_callback_plan = 'docs/plans/2026-06-13-oauth-callback-correlation.md'
+make_root_plan = 'docs/plans/2026-06-14-make-root-override-protection.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -30,6 +31,7 @@ failures << "#{vendored_integrity_plan} is missing" unless File.exist?(vendored_
 failures << "#{sensitive_log_plan} is missing" unless File.exist?(sensitive_log_plan)
 failures << "#{logout_credential_plan} is missing" unless File.exist?(logout_credential_plan)
 failures << "#{oauth_callback_plan} is missing" unless File.exist?(oauth_callback_plan)
+failures << "#{make_root_plan} is missing" unless File.exist?(make_root_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -38,6 +40,26 @@ docs_plans.each do |plan_path|
   plan = File.read(plan_path)
   unless plan.include?('Status: Completed') && plan.include?('make check')
     failures << "#{plan_path} must record completed status and make check verification"
+  end
+end
+
+makefile = File.read('Makefile')
+root_declaration = 'override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))'
+root_assignments = makefile.lines.map(&:chomp).grep(/\A(?:override\s+)?ROOT\s*[:?+]?=/)
+unless makefile.start_with?("#{root_declaration}\n") && root_assignments == [root_declaration]
+  failures << 'Makefile must define exactly one protected repository-derived ROOT declaration first'
+end
+
+if File.exist?(make_root_plan)
+  root_plan = File.read(make_root_plan)
+  [
+    'Status: Completed',
+    '`make ROOT=/tmp check` passed',
+    'all five public Make aliases passed',
+    'Six hostile mutations were rejected',
+    'Ruby 3.3'
+  ].each do |evidence|
+    failures << "#{make_root_plan} must record verification evidence #{evidence.inspect}" unless root_plan.include?(evidence)
   end
 end
 
@@ -167,7 +189,7 @@ else
 end
 
 project_docs = {
-  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', logout_credential_plan, oauth_callback_plan],
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', logout_credential_plan, oauth_callback_plan, make_root_plan],
   'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences', 'correlate OAuth callback request tokens'],
   'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens'],
   'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens']
