@@ -160,6 +160,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   request-token callback correlation before exchange.
 - See `docs/plans/2026-06-14-make-root-override-protection.md` for the
   caller-resistant, location-independent Android validation root.
+- See `docs/plans/2026-06-14-oauth-callback-address-integrity.md` for exact
+  callback authority and path validation before token exchange.
 
 ## Contributing
 
