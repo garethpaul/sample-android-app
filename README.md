@@ -158,6 +158,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   storage and logout credential-purge contract.
 - See `docs/plans/2026-06-13-oauth-callback-correlation.md` for exact-origin and
   request-token callback correlation before exchange.
+- See `docs/plans/2026-06-14-make-root-override-protection.md` for the
+  caller-resistant, location-independent Android validation root.
 
 ## Contributing
 
