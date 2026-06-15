@@ -1,6 +1,6 @@
 # Reset OAuth Request Tokens Before Retry
 
-## Status: Planned
+## Status: Completed
 
 ## Context
 
@@ -66,3 +66,23 @@ Files: `README.md`, `SECURITY.md`, `VISION.md`, `CHANGES.md`
 - Do not claim Gradle, emulator, or device coverage without a compatible
   historical Android SDK.
 - Do not merge or close stacked pull requests without explicit authorization.
+
+## Work Completed
+
+- Reset the shared request token before each new OAuth token request.
+- Acquire the replacement into a local value, publish only the successful
+  result, and use that same local token for browser navigation.
+- Added method-local static ordering checks plus synchronized README, security,
+  vision, and change-history documentation.
+
+## Verification Results
+
+- The focused Android source-contract validation passed.
+- The repository and external-directory `make check` passed; the archival
+  Gradle build remained on its explicit documented skip path because no
+  compatible Android SDK was configured.
+- Six hostile retry-reset mutations were rejected across reset presence and
+  order, direct shared-field acquisition, navigation token selection,
+  documentation, and completed-plan evidence.
+- Final generated-artifact and credential-pattern audits passed alongside the
+  exact-diff, conflict-marker, XML, SVG, and vendored-JAR checks.

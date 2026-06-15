@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-15
+
+- Made OAuth login clear stale request tokens before retry and publish only a
+  successfully acquired replacement for callback correlation.
+
 ## 2026-06-14
 
 - Made OAuth callbacks consume each accepted request token once before exchange,

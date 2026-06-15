@@ -246,6 +246,7 @@ public class MainActivity extends Activity {
         // Check if already logged in
         if (!isTwitterLoggedInAlready()) {
             Log.v(TAG,"Not Logged In");
+            requestToken = null;
             ConfigurationBuilder builder = new ConfigurationBuilder();
             builder.setOAuthConsumerKey(TWITTER_CONSUMER_KEY);
             builder.setOAuthConsumerSecret(TWITTER_CONSUMER_SECRET);
@@ -256,10 +257,11 @@ public class MainActivity extends Activity {
 
             try {
                 Log.v(TAG, "PROCESS REQUEST");
-                requestToken = twitter
+                RequestToken newRequestToken = twitter
                         .getOAuthRequestToken(TWITTER_CALLBACK_URL);
+                requestToken = newRequestToken;
                 this.startActivity(new Intent(Intent.ACTION_VIEW, Uri
-                        .parse(requestToken.getAuthenticationURL())));
+                        .parse(newRequestToken.getAuthenticationURL())));
                 Log.v(TAG,"Sent start activity to parse request token");
 
 
