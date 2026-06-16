@@ -24,6 +24,7 @@ oauth_callback_address_plan = 'docs/plans/2026-06-14-oauth-callback-address-inte
 oauth_request_token_consumption_plan = 'docs/plans/2026-06-14-oauth-request-token-consumption.md'
 oauth_request_token_retry_reset_plan = 'docs/plans/2026-06-15-oauth-request-token-retry-reset.md'
 oauth_session_persistence_plan = 'docs/plans/2026-06-16-oauth-session-persistence.md'
+oauth_session_integrity_plan = 'docs/plans/2026-06-16-oauth-session-integrity.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -40,6 +41,7 @@ failures << "#{oauth_callback_address_plan} is missing" unless File.exist?(oauth
 failures << "#{oauth_request_token_consumption_plan} is missing" unless File.exist?(oauth_request_token_consumption_plan)
 failures << "#{oauth_request_token_retry_reset_plan} is missing" unless File.exist?(oauth_request_token_retry_reset_plan)
 failures << "#{oauth_session_persistence_plan} is missing" unless File.exist?(oauth_session_persistence_plan)
+failures << "#{oauth_session_integrity_plan} is missing" unless File.exist?(oauth_session_integrity_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -353,6 +355,72 @@ if session_persistence
   end
 else
   failures << "#{main_activity_path} must keep persistTwitterSession for OAuth session durability"
+end
+
+session_integrity = main_activity_code.match(
+  /static\s+boolean\s+hasPersistedTwitterSession\s*\(.*?\)\s*\{(?<body>.*?)^    \}/m
+)
+if session_integrity
+  integrity_body = session_integrity[:body]
+  unless integrity_body.include?('AUTH_PREFS_NAME, MODE_PRIVATE') &&
+         integrity_body.include?('getBoolean(PREF_KEY_TWITTER_LOGIN, false)') &&
+         integrity_body.include?('getString(PREF_KEY_OAUTH_TOKEN, "")') &&
+         integrity_body.include?('getString(PREF_KEY_OAUTH_SECRET, "")') &&
+         integrity_body.include?('oauthToken != null && oauthToken.trim().length() > 0') &&
+         integrity_body.include?('oauthSecret != null && oauthSecret.trim().length() > 0') &&
+         integrity_body.match?(/return\s+loggedIn\s*&&/)
+    failures << "#{main_activity_path} must require the login flag and complete OAuth token pair"
+  end
+else
+  failures << "#{main_activity_path} must define hasPersistedTwitterSession"
+end
+
+unless main_activity_code.match?(
+  /private\s+boolean\s+isTwitterLoggedInAlready\s*\(\s*\)\s*\{.*?return\s+hasPersistedTwitterSession\(getApplicationContext\(\)\);.*?^    \}/m
+)
+  failures << "#{main_activity_path} must use complete persisted-session integrity before login navigation"
+end
+
+home_session_guard = home_activity_code.match(
+  /if\s*\(\s*!MainActivity\.hasPersistedTwitterSession\(getApplicationContext\(\)\)\s*\)\s*\{(?<body>.*?)\}/m
+)
+home_on_create = home_activity_code.index('public void onCreate(Bundle savedInstanceState)')
+home_guard_index = home_activity_code.index('!MainActivity.hasPersistedTwitterSession')
+home_content_index = home_activity_code.index('setContentView(R.layout.activity_home)')
+if home_session_guard
+  guard_body = home_session_guard[:body]
+  unless guard_body.include?('MainActivity.clearTwitterSession(getApplicationContext());') &&
+         guard_body.include?('startActivity(new Intent(getApplicationContext(), MainActivity.class));') &&
+         guard_body.include?('finish();') && guard_body.include?('return;') &&
+         home_on_create && home_guard_index && home_content_index &&
+         home_on_create < home_guard_index && home_guard_index < home_content_index
+    failures << "#{home_activity_path} must redirect and terminate incomplete sessions before Home initialization"
+  end
+else
+  failures << "#{home_activity_path} must reject incomplete persisted sessions"
+end
+
+if File.exist?(oauth_session_integrity_plan)
+  integrity_plan = File.read(oauth_session_integrity_plan)
+  [
+    'Status: Completed',
+    'repository and external-directory `make check` passed',
+    'hostile session-integrity mutations were rejected',
+    'generated-artifact and credential-pattern audits passed'
+  ].each do |evidence|
+    failures << "#{oauth_session_integrity_plan} must record verification evidence #{evidence.inspect}" unless integrity_plan.include?(evidence)
+  end
+end
+
+session_integrity_docs = {
+  'README.md' => 'Authenticated entry requires the stored login flag plus a nonempty OAuth token and secret',
+  'SECURITY.md' => 'Treat a stored session as authenticated only when the login flag and both OAuth token values are present',
+  'VISION.md' => 'Require complete persisted OAuth credentials before authenticated entry',
+  'CHANGES.md' => 'Required the persisted login flag and complete OAuth token pair before Main or Home can enter the authenticated flow'
+}
+session_integrity_docs.each do |path, contract|
+  normalized = File.read(path).split.join(' ')
+  failures << "#{path} must document persisted OAuth session integrity" unless normalized.include?(contract)
 end
 
 persistence_gate = main_activity_code.index('if (!persistTwitterSession(getApplicationContext(), username,')

@@ -1,6 +1,6 @@
 # OAuth Session Integrity
 
-Status: In Progress
+Status: Completed
 
 ## Problem
 
@@ -38,3 +38,26 @@ authenticated UI and construct an incomplete access token.
   evidence.
 - Audit the exact diff, secrets, generated artifacts, dependencies, vendored
   binaries, conflicts, modes, and whitespace before commit and push.
+
+## Work Completed
+
+- Added one complete persisted-session predicate requiring the login flag,
+  OAuth token, and OAuth secret.
+- Routed Main login-state navigation through the complete predicate.
+- Rejected incomplete Home sessions before layout, ads, image loading, or
+  timeline work; cleanup is attempted before redirect and termination.
+- Added mutation-sensitive static contracts and synchronized maintenance
+  guidance.
+
+## Verification Completed
+
+- The focused Android contract passed.
+- The repository and external-directory `make check` passed.
+- Seven hostile session-integrity mutations were rejected across the login
+  flag, token and secret checks, Home entry guard, redirect termination,
+  guidance, and completed-plan evidence.
+- The exact eight-file implementation diff passed whitespace, secret,
+  dependency, vendored-binary, conflict-marker, mode, and intended-path audits.
+- The generated-artifact and credential-pattern audits passed.
+- Android Gradle execution remains outside the Linux static legacy boundary;
+  no SDK-dependent runtime behavior is claimed.

@@ -98,6 +98,8 @@ secrets.
   request token once and clear stale request tokens before retry.
 - OAuth completion requires both profile and auth preference commits before
   authenticated navigation and purges both stores after persistence failure.
+- Authenticated entry requires the stored login flag plus a nonempty OAuth
+  token and secret; incomplete Home sessions redirect before network work.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - The static checker also requires completed canonical plans under `docs/plans`.
 - GitHub Actions installs Ruby 3.3 and runs `make check` with pinned actions,
@@ -171,6 +173,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   OAuth retries that discard stale in-memory request tokens.
 - See `docs/plans/2026-06-16-oauth-session-persistence.md` for fail-closed
   profile and OAuth credential persistence before authenticated navigation.
+- See `docs/plans/2026-06-16-oauth-session-integrity.md` for complete persisted
+  OAuth credential checks at both authenticated entry points.
 
 ## Contributing
 
