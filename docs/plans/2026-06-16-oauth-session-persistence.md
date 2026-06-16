@@ -1,6 +1,6 @@
 # OAuth Session Persistence
 
-Status: In Progress
+Status: Completed
 
 ## Problem
 
@@ -40,8 +40,21 @@ incomplete or inconsistent local session.
 
 ## Work Completed
 
-Pending implementation and validation.
+- Added one synchronous persistence helper that commits profile data before
+  OAuth credentials and returns success only after both stores succeed.
+- Purged both preference stores and stopped navigation after either commit
+  failure.
+- Added mutation-sensitive static contracts, synchronized guidance, and this
+  completed evidence record.
 
 ## Verification Completed
 
-Pending implementation and validation.
+- The focused static Android contract and full `make check` gate passed from
+  the repository and through the absolute Makefile path from `/tmp`.
+- Six isolated hostile mutations were rejected across profile commit gating,
+  auth commit gating, cleanup, navigation ordering, guidance, and plan status.
+- The exact seven-file implementation diff passed `git diff --check`, secret,
+  generated-artifact, dependency, vendored-binary, conflict-marker, mode, and
+  intended-path audits.
+- Android Gradle execution remains outside the Linux static legacy boundary;
+  no SDK-dependent runtime behavior is claimed.

@@ -51,6 +51,8 @@ Helpful reports include:
 - Login must correlate OAuth callback request tokens with the active request,
   exact callback authority and path, and a nonempty verifier before token exchange,
   then consume each accepted request token once and clear stale request tokens before retry.
+- Require both profile and auth preference commits before authenticated
+  navigation, and purge both stores after either persistence failure.
 
 ## Mobile Privacy Notes
 

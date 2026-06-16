@@ -23,6 +23,7 @@ make_root_plan = 'docs/plans/2026-06-14-make-root-override-protection.md'
 oauth_callback_address_plan = 'docs/plans/2026-06-14-oauth-callback-address-integrity.md'
 oauth_request_token_consumption_plan = 'docs/plans/2026-06-14-oauth-request-token-consumption.md'
 oauth_request_token_retry_reset_plan = 'docs/plans/2026-06-15-oauth-request-token-retry-reset.md'
+oauth_session_persistence_plan = 'docs/plans/2026-06-16-oauth-session-persistence.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -38,6 +39,7 @@ failures << "#{make_root_plan} is missing" unless File.exist?(make_root_plan)
 failures << "#{oauth_callback_address_plan} is missing" unless File.exist?(oauth_callback_address_plan)
 failures << "#{oauth_request_token_consumption_plan} is missing" unless File.exist?(oauth_request_token_consumption_plan)
 failures << "#{oauth_request_token_retry_reset_plan} is missing" unless File.exist?(oauth_request_token_retry_reset_plan)
+failures << "#{oauth_session_persistence_plan} is missing" unless File.exist?(oauth_session_persistence_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -195,10 +197,10 @@ else
 end
 
 project_docs = {
-  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', 'clear stale request tokens before retry', logout_credential_plan, oauth_callback_plan, make_root_plan, oauth_callback_address_plan, oauth_request_token_consumption_plan, oauth_request_token_retry_reset_plan],
-  'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'clear stale request tokens before retry'],
-  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', 'clear stale request tokens before retry'],
-  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', 'clear stale request tokens before retry']
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', 'clear stale request tokens before retry', 'both profile and auth preference commits before authenticated navigation', logout_credential_plan, oauth_callback_plan, make_root_plan, oauth_callback_address_plan, oauth_request_token_consumption_plan, oauth_request_token_retry_reset_plan, oauth_session_persistence_plan],
+  'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'clear stale request tokens before retry', 'both profile and auth preference commits before authenticated navigation'],
+  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', 'clear stale request tokens before retry', 'both profile and auth preference commits before authenticated navigation'],
+  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', 'clear stale request tokens before retry', 'both profile and auth preference commits before authenticated navigation']
 }
 
 project_docs.each do |path, required_phrases|
@@ -328,6 +330,40 @@ unless session_clear &&
   failures << "#{main_activity_path} must synchronously clear both profile and auth preferences on logout"
 end
 
+session_persistence = main_activity_code.match(
+  /static\s+boolean\s+persistTwitterSession\s*\(.*?\)\s*\{(?<body>.*?)^    \}/m
+)
+if session_persistence
+  persistence_body = session_persistence[:body]
+  profile_commit = persistence_body.index('boolean profileSaved = profileEditor.commit();')
+  auth_commit = persistence_body.index('boolean authSaved = authEditor.commit();')
+  profile_failure = persistence_body.index('if (!profileSaved)')
+  auth_failure = persistence_body.index('if (!authSaved)')
+  cleanup_calls = persistence_body.scan(/clearTwitterSession\(context\);/).length
+  unless persistence_body.include?('PROFILE_PREFS_NAME, MODE_PRIVATE') &&
+         persistence_body.include?('AUTH_PREFS_NAME, MODE_PRIVATE') &&
+         persistence_body.include?('profileEditor.putString("username", username);') &&
+         persistence_body.include?('authEditor.putString(PREF_KEY_OAUTH_TOKEN, oauthToken);') &&
+         persistence_body.include?('authEditor.putString(PREF_KEY_OAUTH_SECRET, oauthSecret);') &&
+         persistence_body.include?('authEditor.putBoolean(PREF_KEY_TWITTER_LOGIN, true);') &&
+         profile_commit && auth_commit && profile_failure && auth_failure &&
+         profile_commit < profile_failure && profile_failure < auth_commit && auth_commit < auth_failure &&
+         cleanup_calls == 2 && persistence_body.include?('return true;')
+    failures << "#{main_activity_path} must require both preference commits and purge partial OAuth sessions"
+  end
+else
+  failures << "#{main_activity_path} must keep persistTwitterSession for OAuth session durability"
+end
+
+persistence_gate = main_activity_code.index('if (!persistTwitterSession(getApplicationContext(), username,')
+persistence_failure = main_activity_code.index('Log.e(TAG, "Failed to store Twitter session");')
+authenticated_navigation = main_activity_code.index('startActivity(goToNextActivity);')
+unless persistence_gate && persistence_failure && authenticated_navigation &&
+       persistence_gate < persistence_failure && persistence_failure < authenticated_navigation &&
+       main_activity_code.match?(/if\s*\(\s*!persistTwitterSession\(.*?\)\s*\)\s*\{\s*Log\.e\(TAG, "Failed to store Twitter session"\);\s*return;/m)
+  failures << "#{main_activity_path} must stop authenticated navigation when OAuth session persistence fails"
+end
+
 unless main_activity_code.match?(/if\s*\(\s*!clearTwitterSession\(getApplicationContext\(\)\)\s*\)\s*\{\s*Log\.e\(TAG, "Failed to clear Twitter session"\);\s*return;/m) &&
        home_activity_code.match?(/if\s*\(\s*!MainActivity\.clearTwitterSession\(getApplicationContext\(\)\)\s*\)\s*\{\s*Log\.e\(TAG, "Failed to clear Twitter session"\);\s*return;/m)
   failures << 'both logout flows must stop navigation when credential purge fails'
@@ -430,6 +466,19 @@ if File.exist?(oauth_request_token_retry_reset_plan)
     'generated-artifact and credential-pattern audits passed'
   ].each do |evidence|
     failures << "#{oauth_request_token_retry_reset_plan} must record verification evidence #{evidence.inspect}" unless retry_plan.include?(evidence)
+  end
+end
+
+if File.exist?(oauth_session_persistence_plan)
+  persistence_plan = File.read(oauth_session_persistence_plan)
+  [
+    'Status: Completed',
+    'repository and through the absolute Makefile path from `/tmp`',
+    'Six isolated hostile mutations were rejected',
+    'Android Gradle execution remains outside the Linux static legacy boundary',
+    'git diff --check'
+  ].each do |evidence|
+    failures << "#{oauth_session_persistence_plan} must record verification evidence #{evidence.inspect}" unless persistence_plan.include?(evidence)
   end
 end
 
