@@ -25,6 +25,7 @@ oauth_request_token_consumption_plan = 'docs/plans/2026-06-14-oauth-request-toke
 oauth_request_token_retry_reset_plan = 'docs/plans/2026-06-15-oauth-request-token-retry-reset.md'
 oauth_session_persistence_plan = 'docs/plans/2026-06-16-oauth-session-persistence.md'
 oauth_session_integrity_plan = 'docs/plans/2026-06-16-oauth-session-integrity.md'
+logout_back_stack_plan = 'docs/plans/2026-06-17-logout-back-stack-revocation.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -42,6 +43,7 @@ failures << "#{oauth_request_token_consumption_plan} is missing" unless File.exi
 failures << "#{oauth_request_token_retry_reset_plan} is missing" unless File.exist?(oauth_request_token_retry_reset_plan)
 failures << "#{oauth_session_persistence_plan} is missing" unless File.exist?(oauth_session_persistence_plan)
 failures << "#{oauth_session_integrity_plan} is missing" unless File.exist?(oauth_session_integrity_plan)
+failures << "#{logout_back_stack_plan} is missing" unless File.exist?(logout_back_stack_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -435,6 +437,46 @@ end
 unless main_activity_code.match?(/if\s*\(\s*!clearTwitterSession\(getApplicationContext\(\)\)\s*\)\s*\{\s*Log\.e\(TAG, "Failed to clear Twitter session"\);\s*return;/m) &&
        home_activity_code.match?(/if\s*\(\s*!MainActivity\.clearTwitterSession\(getApplicationContext\(\)\)\s*\)\s*\{\s*Log\.e\(TAG, "Failed to clear Twitter session"\);\s*return;/m)
   failures << 'both logout flows must stop navigation when credential purge fails'
+end
+
+home_logout = home_activity_code.match(
+  /private\s+void\s+logoutFromTwitter\s*\(\s*\)\s*\{(?<body>.*?)^    \}/m
+)
+if home_logout
+  logout_body = home_logout[:body]
+  clear_call = logout_body.index('MainActivity.clearTwitterSession(getApplicationContext())')
+  failure_return = logout_body.index('return;')
+  login_navigation = logout_body.index('startActivity(goToNextActivity);')
+  revoke_home = logout_body.index('finish();')
+  unless clear_call && failure_return && login_navigation && revoke_home &&
+         clear_call < failure_return && failure_return < login_navigation && login_navigation < revoke_home
+    failures << "#{home_activity_path} must revoke Home from the back stack only after successful logout navigation"
+  end
+else
+  failures << "#{home_activity_path} must keep logoutFromTwitter for back-stack revocation"
+end
+
+if File.exist?(logout_back_stack_plan)
+  logout_back_stack_evidence = File.read(logout_back_stack_plan)
+  [
+    'Status: Completed',
+    'repository and external-directory `make check` passed',
+    'hostile logout back-stack mutations were rejected',
+    'generated-artifact and credential-pattern audits passed',
+    'Exact diff'
+  ].each do |evidence|
+    failures << "#{logout_back_stack_plan} must record verification evidence #{evidence.inspect}" unless logout_back_stack_evidence.include?(evidence)
+  end
+end
+
+logout_back_stack_docs = {
+  'README.md' => 'remove the authenticated Home activity from the back stack',
+  'SECURITY.md' => 'remove the authenticated Home activity from the back stack',
+  'VISION.md' => 'remove the authenticated Home activity from the back stack',
+  'CHANGES.md' => 'remove the authenticated Home activity from the back stack'
+}
+logout_back_stack_docs.each do |path, contract|
+  failures << "#{path} must document logout back-stack revocation" unless File.read(path).split.join(' ').include?(contract)
 end
 
 if main_activity_code.include?('editor.putString("token"') ||

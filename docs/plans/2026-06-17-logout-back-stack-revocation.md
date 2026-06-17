@@ -1,6 +1,6 @@
 # Logout Back Stack Revocation
 
-Status: In Progress
+Status: Completed
 
 ## Problem
 
@@ -60,3 +60,24 @@ profile and timeline content after logout.
   credentials persisted.
 - Finishing before navigation could expose an empty task transition on legacy
   Android versions.
+
+## Work Completed
+
+- Finished Home only after successful credential clearing and login navigation.
+- Preserved the failed-clear return path so unsuccessful logout does not hide
+  retained credentials.
+- Added method-scoped static ordering, guidance, plan-index, and completed
+  evidence contracts without changing the Android build boundary.
+
+## Verification Completed
+
+- The focused static Android contract passed.
+- The repository and external-directory `make check` passed.
+- Seven hostile logout back-stack mutations were rejected across finish
+  removal, ordering, failed-clear termination, clear gating, guidance, plan
+  status, and exact gate evidence.
+- Exact diff, dependency, vendored-binary, conflict, mode, and whitespace audits
+  passed with only the seven intended paths and unchanged stacked base.
+- The generated-artifact and credential-pattern audits passed.
+- Android Gradle execution remains outside the Linux static legacy boundary;
+  no SDK-dependent runtime behavior is claimed.

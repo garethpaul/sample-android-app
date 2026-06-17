@@ -170,6 +170,7 @@ public class HomeActivity extends Activity {
         }
         Intent goToNextActivity = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(goToNextActivity);
+        finish();
 
     }
     private class GetTweets extends AsyncTask<String, Void, Boolean>{

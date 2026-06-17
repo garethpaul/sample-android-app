@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-17
+
+- Made successful logout remove the authenticated Home activity from the back stack
+  after credential clearing and login navigation.
+
 ## 2026-06-16
 
 - Required the persisted login flag and complete OAuth token pair before Main
