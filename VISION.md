@@ -44,6 +44,7 @@ Priority:
 - Require both profile and auth preference commits before authenticated
   navigation and clear partial session state on persistence failure
 - Require complete persisted OAuth credentials before authenticated entry
+- On successful logout, remove the authenticated Home activity from the back stack
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:

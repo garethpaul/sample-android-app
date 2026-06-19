@@ -55,6 +55,8 @@ Helpful reports include:
   navigation, and purge both stores after either persistence failure.
 - Treat a stored session as authenticated only when the login flag and both
   OAuth token values are present, including direct or restored Home entry.
+- Successful logout must remove the authenticated Home activity from the back stack
+  so Back cannot reveal previously loaded account content.
 
 ## Mobile Privacy Notes
 

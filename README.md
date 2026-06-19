@@ -100,6 +100,8 @@ secrets.
   authenticated navigation and purges both stores after persistence failure.
 - Authenticated entry requires the stored login flag plus a nonempty OAuth
   token and secret; incomplete Home sessions redirect before network work.
+- Successful logout must remove the authenticated Home activity from the back stack
+  after credentials are cleared and login navigation starts.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - The static checker also requires completed canonical plans under `docs/plans`.
 - GitHub Actions installs Ruby 3.3 and runs `make check` with pinned actions,
@@ -175,6 +177,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   profile and OAuth credential persistence before authenticated navigation.
 - See `docs/plans/2026-06-16-oauth-session-integrity.md` for complete persisted
   OAuth credential checks at both authenticated entry points.
+- See `docs/plans/2026-06-17-logout-back-stack-revocation.md` for revoking the
+  authenticated Home activity after successful logout.
 
 ## Contributing
 
