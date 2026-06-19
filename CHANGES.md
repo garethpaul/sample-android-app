@@ -2,6 +2,8 @@
 
 ## 2026-06-16
 
+- Required the persisted login flag and complete OAuth token pair before Main
+  or Home can enter the authenticated flow.
 - Required both profile and auth preference commits before authenticated
   navigation and purged partial session state after persistence failure.
 

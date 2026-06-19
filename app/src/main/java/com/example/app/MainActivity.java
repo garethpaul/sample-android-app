@@ -326,6 +326,18 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    static boolean hasPersistedTwitterSession(android.content.Context context) {
+        SharedPreferences authPreferences = context.getSharedPreferences(
+                AUTH_PREFS_NAME, MODE_PRIVATE);
+        boolean loggedIn = authPreferences.getBoolean(PREF_KEY_TWITTER_LOGIN, false);
+        String oauthToken = authPreferences.getString(PREF_KEY_OAUTH_TOKEN, "");
+        String oauthSecret = authPreferences.getString(PREF_KEY_OAUTH_SECRET, "");
+
+        return loggedIn
+                && oauthToken != null && oauthToken.trim().length() > 0
+                && oauthSecret != null && oauthSecret.trim().length() > 0;
+    }
+
     static boolean isExpectedOAuthCallback(Uri uri, RequestToken expectedRequestToken) {
         if (uri == null || expectedRequestToken == null) {
             return false;
@@ -351,9 +363,7 @@ public class MainActivity extends Activity {
      * */
     private boolean isTwitterLoggedInAlready() {
         Log.v(TAG, "isTwitter Logged In");
-        // return twitter login status from Shared Preferences
-        Boolean state = mSharedPreferences.getBoolean(PREF_KEY_TWITTER_LOGIN, false);
-        return state;
+        return hasPersistedTwitterSession(getApplicationContext());
 
     }
 

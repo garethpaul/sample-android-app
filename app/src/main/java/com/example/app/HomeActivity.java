@@ -97,6 +97,12 @@ public class HomeActivity extends Activity {
         Log.v(TAG,"onCreate");
 
         super.onCreate(savedInstanceState);
+        if (!MainActivity.hasPersistedTwitterSession(getApplicationContext())) {
+            MainActivity.clearTwitterSession(getApplicationContext());
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_home);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 

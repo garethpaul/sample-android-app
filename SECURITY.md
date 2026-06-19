@@ -53,6 +53,8 @@ Helpful reports include:
   then consume each accepted request token once and clear stale request tokens before retry.
 - Require both profile and auth preference commits before authenticated
   navigation, and purge both stores after either persistence failure.
+- Treat a stored session as authenticated only when the login flag and both
+  OAuth token values are present, including direct or restored Home entry.
 
 ## Mobile Privacy Notes
 
