@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-14
+
+- Made OAuth callbacks consume each accepted request token once before exchange,
+  preventing in-memory callback replay after logout or failed exchange.
+
 ## 2026-06-13
 
 - Required login to correlate OAuth callback request tokens with the active

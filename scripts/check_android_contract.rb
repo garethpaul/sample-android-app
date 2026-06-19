@@ -21,6 +21,7 @@ logout_credential_plan = 'docs/plans/2026-06-13-logout-credential-purge.md'
 oauth_callback_plan = 'docs/plans/2026-06-13-oauth-callback-correlation.md'
 make_root_plan = 'docs/plans/2026-06-14-make-root-override-protection.md'
 oauth_callback_address_plan = 'docs/plans/2026-06-14-oauth-callback-address-integrity.md'
+oauth_request_token_consumption_plan = 'docs/plans/2026-06-14-oauth-request-token-consumption.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -34,6 +35,7 @@ failures << "#{logout_credential_plan} is missing" unless File.exist?(logout_cre
 failures << "#{oauth_callback_plan} is missing" unless File.exist?(oauth_callback_plan)
 failures << "#{make_root_plan} is missing" unless File.exist?(make_root_plan)
 failures << "#{oauth_callback_address_plan} is missing" unless File.exist?(oauth_callback_address_plan)
+failures << "#{oauth_request_token_consumption_plan} is missing" unless File.exist?(oauth_request_token_consumption_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -191,10 +193,10 @@ else
 end
 
 project_docs = {
-  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', logout_credential_plan, oauth_callback_plan, make_root_plan, oauth_callback_address_plan],
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', logout_credential_plan, oauth_callback_plan, make_root_plan, oauth_callback_address_plan, oauth_request_token_consumption_plan],
   'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences', 'correlate OAuth callback request tokens'],
-  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path'],
-  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path']
+  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once'],
+  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once']
 }
 
 project_docs.each do |path, required_phrases|
@@ -377,11 +379,23 @@ if File.exist?(oauth_callback_address_plan)
 end
 
 callback_gate = main_activity_code.index('if (!isExpectedOAuthCallback(uri, requestToken))')
+callback_token_copy = main_activity_code.index('RequestToken callbackRequestToken = requestToken;')
+callback_token_clear = main_activity_code.index('requestToken = null;')
 access_token_exchange = main_activity_code.index('twitter.getOAuthAccessToken(')
-unless callback_gate && access_token_exchange && callback_gate < access_token_exchange &&
+unless callback_gate && callback_token_copy && callback_token_clear && access_token_exchange &&
+       callback_gate < callback_token_copy && callback_token_copy < callback_token_clear &&
+       callback_token_clear < access_token_exchange &&
+       main_activity_code.include?('callbackRequestToken, verifier') &&
        main_activity_code.include?('Log.e(TAG, "Rejected invalid Twitter callback");') &&
        !main_activity_code.include?('uri.toString().startsWith(TWITTER_CALLBACK_URL)')
-  failures << "#{main_activity_path} must reject invalid OAuth callbacks before token exchange without prefix matching"
+  failures << "#{main_activity_path} must consume an accepted OAuth request token before exchange"
+end
+
+if File.exist?(oauth_request_token_consumption_plan)
+  token_plan = File.read(oauth_request_token_consumption_plan)
+  ['Status: Completed', 'repository and external-directory `make check` passed', 'hostile request-token mutations were rejected'].each do |evidence|
+    failures << "#{oauth_request_token_consumption_plan} must record verification evidence #{evidence.inspect}" unless token_plan.include?(evidence)
+  end
 end
 
 manifest_path = 'app/src/main/AndroidManifest.xml'
