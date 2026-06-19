@@ -259,7 +259,6 @@ public class MainActivity extends Activity {
 
             } catch (TwitterException e) {
                 Log.v(TAG,"Issue with Login");
-                e.printStackTrace();
             }
         } else {
             // user already logged into twitter

@@ -43,6 +43,8 @@ Helpful reports include:
 - OAuth preferences, profile fields, timelines, and tweet collections must not
   be written to sensitive Logcat output; event and tagged failure logs remain
   permitted when they contain no credential or user-content values.
+- Caught exception objects, messages, and stack traces must not be written to
+  Logcat; use fixed tagged failure events that do not expose diagnostic state.
 
 ## Mobile Privacy Notes
 
