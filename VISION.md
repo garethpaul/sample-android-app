@@ -40,6 +40,7 @@ Priority:
   preferences before logout navigation
 - Keep login flows able to correlate OAuth callback request tokens with the
   active request and exact callback origin before exchange
+- Keep login flows able to clear stale request tokens before retry
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:

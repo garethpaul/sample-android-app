@@ -22,6 +22,7 @@ oauth_callback_plan = 'docs/plans/2026-06-13-oauth-callback-correlation.md'
 make_root_plan = 'docs/plans/2026-06-14-make-root-override-protection.md'
 oauth_callback_address_plan = 'docs/plans/2026-06-14-oauth-callback-address-integrity.md'
 oauth_request_token_consumption_plan = 'docs/plans/2026-06-14-oauth-request-token-consumption.md'
+oauth_request_token_retry_reset_plan = 'docs/plans/2026-06-15-oauth-request-token-retry-reset.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -36,6 +37,7 @@ failures << "#{oauth_callback_plan} is missing" unless File.exist?(oauth_callbac
 failures << "#{make_root_plan} is missing" unless File.exist?(make_root_plan)
 failures << "#{oauth_callback_address_plan} is missing" unless File.exist?(oauth_callback_address_plan)
 failures << "#{oauth_request_token_consumption_plan} is missing" unless File.exist?(oauth_request_token_consumption_plan)
+failures << "#{oauth_request_token_retry_reset_plan} is missing" unless File.exist?(oauth_request_token_retry_reset_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -193,10 +195,10 @@ else
 end
 
 project_docs = {
-  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', logout_credential_plan, oauth_callback_plan, make_root_plan, oauth_callback_address_plan, oauth_request_token_consumption_plan],
-  'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences', 'correlate OAuth callback request tokens'],
-  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once'],
-  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once']
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', 'clear stale request tokens before retry', logout_credential_plan, oauth_callback_plan, make_root_plan, oauth_callback_address_plan, oauth_request_token_consumption_plan, oauth_request_token_retry_reset_plan],
+  'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'clear stale request tokens before retry'],
+  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', 'clear stale request tokens before retry'],
+  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', 'consume each accepted request token once', 'clear stale request tokens before retry']
 }
 
 project_docs.each do |path, required_phrases|
@@ -395,6 +397,39 @@ if File.exist?(oauth_request_token_consumption_plan)
   token_plan = File.read(oauth_request_token_consumption_plan)
   ['Status: Completed', 'repository and external-directory `make check` passed', 'hostile request-token mutations were rejected'].each do |evidence|
     failures << "#{oauth_request_token_consumption_plan} must record verification evidence #{evidence.inspect}" unless token_plan.include?(evidence)
+  end
+end
+
+login_flow = main_activity_code.match(
+  /private\s+void\s+loginToTwitter\s*\(\s*\)\s*\{(?<body>.*?)^    \}/m
+)
+if login_flow
+  retry_body = login_flow[:body]
+  reset = retry_body.index('requestToken = null;')
+  configure = retry_body.index('ConfigurationBuilder builder = new ConfigurationBuilder();')
+  acquire = retry_body.index('RequestToken newRequestToken = twitter')
+  publish = retry_body.index('requestToken = newRequestToken;')
+  navigate = retry_body.index('newRequestToken.getAuthenticationURL()')
+  unless reset && configure && acquire && publish && navigate &&
+         reset < configure && configure < acquire && acquire < publish && publish < navigate &&
+         retry_body.include?('.getOAuthRequestToken(TWITTER_CALLBACK_URL)') &&
+         !retry_body.include?('requestToken = twitter') &&
+         !retry_body.include?('requestToken.getAuthenticationURL()')
+    failures << "#{main_activity_path} must clear stale request tokens before retry and publish only a successful local token"
+  end
+else
+  failures << "#{main_activity_path} must keep loginToTwitter for OAuth retry validation"
+end
+
+if File.exist?(oauth_request_token_retry_reset_plan)
+  retry_plan = File.read(oauth_request_token_retry_reset_plan)
+  [
+    'Status: Completed',
+    'repository and external-directory `make check` passed',
+    'hostile retry-reset mutations were rejected',
+    'generated-artifact and credential-pattern audits passed'
+  ].each do |evidence|
+    failures << "#{oauth_request_token_retry_reset_plan} must record verification evidence #{evidence.inspect}" unless retry_plan.include?(evidence)
   end
 end
 

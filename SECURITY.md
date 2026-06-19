@@ -50,7 +50,7 @@ Helpful reports include:
   authenticated screen if either purge fails.
 - Login must correlate OAuth callback request tokens with the active request,
   exact callback authority and path, and a nonempty verifier before token exchange,
-  then consume each accepted request token once.
+  then consume each accepted request token once and clear stale request tokens before retry.
 
 ## Mobile Privacy Notes
 

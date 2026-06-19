@@ -94,7 +94,8 @@ secrets.
   returning to the login screen.
 - `make check` also requires the login flow to correlate OAuth callback request
   tokens with the active request token, exact callback authority and path, and
-  a nonempty verifier before access-token exchange, then consume each accepted request token once.
+  a nonempty verifier before access-token exchange, then consume each accepted
+  request token once and clear stale request tokens before retry.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - The static checker also requires completed canonical plans under `docs/plans`.
 - GitHub Actions installs Ruby 3.3 and runs `make check` with pinned actions,
@@ -164,6 +165,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   callback authority and path validation before token exchange.
 - See `docs/plans/2026-06-14-oauth-request-token-consumption.md` for one-shot
   request-token consumption before access-token exchange.
+- See `docs/plans/2026-06-15-oauth-request-token-retry-reset.md` for fail-closed
+  OAuth retries that discard stale in-memory request tokens.
 
 ## Contributing
 
