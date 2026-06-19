@@ -138,8 +138,6 @@ public class MainActivity extends Activity {
         lblUpdate = (TextView) findViewById(R.id.lblUpdate);
         lblUserName = (TextView) findViewById(R.id.lblUserName);
 
-        SharedPreferences twttr = getSharedPreferences(PROFILE_PREFS_NAME, MODE_PRIVATE);
-
         // Shared Preferences
         mSharedPreferences = getApplicationContext().getSharedPreferences(AUTH_PREFS_NAME, MODE_PRIVATE);
         /**
@@ -204,27 +202,13 @@ public class MainActivity extends Activity {
                     String screen_name = user.getScreenName();
 
 
-                    // Shared Preferences
+                    if (!persistTwitterSession(getApplicationContext(), username,
+                            profile_pic, screen_name, userID, accessToken.getToken(),
+                            accessToken.getTokenSecret())) {
+                        Log.e(TAG, "Failed to store Twitter session");
+                        return;
+                    }
 
-                    SharedPreferences.Editor editor = twttr.edit();
-                    editor.putString("username", username);
-                    editor.putString("profile_pic", profile_pic);
-                    editor.putString("screen_name", screen_name);
-                    editor.putLong("userid", userID);
-                    editor.commit();
-
-
-                    Editor e = mSharedPreferences.edit();
-
-                    // After getting access token, access token secret
-                    // store them in application preferences
-
-                    e.putString(PREF_KEY_OAUTH_TOKEN, accessToken.getToken());
-                    e.putString(PREF_KEY_OAUTH_SECRET,
-                            accessToken.getTokenSecret());
-                    // Store login status - true
-                    e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
-                    e.commit(); // save changes
                     // user already logged into twitter
                     Intent goToNextActivity = new Intent(getApplicationContext(), HomeActivity.class);
                     startActivity(goToNextActivity);
@@ -309,6 +293,37 @@ public class MainActivity extends Activity {
         boolean profileCleared = profilePreferences.edit().clear().commit();
         boolean authCleared = authPreferences.edit().clear().commit();
         return profileCleared && authCleared;
+    }
+
+    static boolean persistTwitterSession(android.content.Context context,
+            String username, String profilePicture, String screenName, long userId,
+            String oauthToken, String oauthSecret) {
+        SharedPreferences profilePreferences = context.getSharedPreferences(
+                PROFILE_PREFS_NAME, MODE_PRIVATE);
+        Editor profileEditor = profilePreferences.edit();
+        profileEditor.putString("username", username);
+        profileEditor.putString("profile_pic", profilePicture);
+        profileEditor.putString("screen_name", screenName);
+        profileEditor.putLong("userid", userId);
+        boolean profileSaved = profileEditor.commit();
+        if (!profileSaved) {
+            clearTwitterSession(context);
+            return false;
+        }
+
+        SharedPreferences authPreferences = context.getSharedPreferences(
+                AUTH_PREFS_NAME, MODE_PRIVATE);
+        Editor authEditor = authPreferences.edit();
+        authEditor.putString(PREF_KEY_OAUTH_TOKEN, oauthToken);
+        authEditor.putString(PREF_KEY_OAUTH_SECRET, oauthSecret);
+        authEditor.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
+        boolean authSaved = authEditor.commit();
+        if (!authSaved) {
+            clearTwitterSession(context);
+            return false;
+        }
+
+        return true;
     }
 
     static boolean isExpectedOAuthCallback(Uri uri, RequestToken expectedRequestToken) {

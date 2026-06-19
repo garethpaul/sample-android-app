@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-16
+
+- Required both profile and auth preference commits before authenticated
+  navigation and purged partial session state after persistence failure.
+
 ## 2026-06-15
 
 - Made OAuth login clear stale request tokens before retry and publish only a
