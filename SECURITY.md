@@ -49,7 +49,7 @@ Helpful reports include:
   synchronously clear both auth and profile preferences and remain on the
   authenticated screen if either purge fails.
 - Login must correlate OAuth callback request tokens with the active request,
-  exact callback scheme and host, and a nonempty verifier before token exchange.
+  exact callback authority and path, and a nonempty verifier before token exchange.
 
 ## Mobile Privacy Notes
 

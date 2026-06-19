@@ -20,6 +20,7 @@ sensitive_log_plan = 'docs/plans/2026-06-12-sensitive-log-redaction.md'
 logout_credential_plan = 'docs/plans/2026-06-13-logout-credential-purge.md'
 oauth_callback_plan = 'docs/plans/2026-06-13-oauth-callback-correlation.md'
 make_root_plan = 'docs/plans/2026-06-14-make-root-override-protection.md'
+oauth_callback_address_plan = 'docs/plans/2026-06-14-oauth-callback-address-integrity.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -32,6 +33,7 @@ failures << "#{sensitive_log_plan} is missing" unless File.exist?(sensitive_log_
 failures << "#{logout_credential_plan} is missing" unless File.exist?(logout_credential_plan)
 failures << "#{oauth_callback_plan} is missing" unless File.exist?(oauth_callback_plan)
 failures << "#{make_root_plan} is missing" unless File.exist?(make_root_plan)
+failures << "#{oauth_callback_address_plan} is missing" unless File.exist?(oauth_callback_address_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -189,10 +191,10 @@ else
 end
 
 project_docs = {
-  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', logout_credential_plan, oauth_callback_plan, make_root_plan],
+  'README.md' => ['GitHub Actions', 'docs/plans/2026-06-10-ci-baseline.md', 'sensitive Logcat', 'caught exception messages', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path', logout_credential_plan, oauth_callback_plan, make_root_plan, oauth_callback_address_plan],
   'VISION.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception', 'both auth and profile preferences', 'correlate OAuth callback request tokens'],
-  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens'],
-  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens']
+  'SECURITY.md' => ['GitHub Actions', 'make check', 'sensitive Logcat', 'Caught exception objects', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path'],
+  'CHANGES.md' => ['GitHub Actions', 'sensitive Logcat', 'caught exception payloads', 'both auth and profile preferences', 'correlate OAuth callback request tokens', 'exact callback authority and path']
 }
 
 project_docs.each do |path, required_phrases|
@@ -355,10 +357,23 @@ unless callback_validator &&
        callback_validator[:body].include?('getQueryParameter(URL_TWITTER_OAUTH_TOKEN)') &&
        callback_validator[:body].include?('getQueryParameter(URL_TWITTER_OAUTH_VERIFIER)') &&
        callback_validator[:body].include?('configuredCallback.getScheme().equals(uri.getScheme())') &&
-       callback_validator[:body].include?('configuredCallback.getHost().equals(uri.getHost())') &&
+       callback_validator[:body].include?('configuredCallback.getAuthority().equals(uri.getAuthority())') &&
+       callback_validator[:body].include?('configuredCallback.getEncodedPath().equals(uri.getEncodedPath())') &&
        callback_validator[:body].include?('expectedToken.equals(callbackToken)') &&
        callback_validator[:body].include?('verifier.trim().length() > 0')
-  failures << "#{main_activity_path} must correlate exact-origin OAuth callbacks with the active request token and verifier"
+  failures << "#{main_activity_path} must correlate the exact OAuth callback address with the active request token and verifier"
+end
+
+if File.exist?(oauth_callback_address_plan)
+  callback_address_plan = File.read(oauth_callback_address_plan)
+  [
+    'Status: Completed',
+    'repository and external-directory `make check` passed',
+    'hostile callback-address mutations were rejected',
+    'generated-artifact and credential-pattern audits passed'
+  ].each do |evidence|
+    failures << "#{oauth_callback_address_plan} must record verification evidence #{evidence.inspect}" unless callback_address_plan.include?(evidence)
+  end
 end
 
 callback_gate = main_activity_code.index('if (!isExpectedOAuthCallback(uri, requestToken))')

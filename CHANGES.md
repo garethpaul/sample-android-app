@@ -4,6 +4,8 @@
 
 - Required login to correlate OAuth callback request tokens with the active
   request, exact callback origin, and verifier before access-token exchange.
+- Required the exported login flow to match the exact callback authority and path
+  so alternate ports, user-info authorities, and paths cannot reach token exchange.
 - Kept OAuth tokens out of profile metadata and made logout clear both auth and
   profile preferences before returning to the login screen.
 
