@@ -16,6 +16,8 @@ independently enforceable.
 - Pinned the Node 24 checkout and Ruby setup actions by verified commit SHA.
 - Restricted workflow permissions to read-only contents and bounded the job to
   five minutes.
+- Disabled checkout credential persistence and kept push validation unfiltered.
+- Added CODEOWNERS and fail-closed workflow policy checks.
 - Extended the Android contract checker and docs so future changes keep the
   hosted CI baseline visible.
 

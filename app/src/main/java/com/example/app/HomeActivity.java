@@ -114,10 +114,8 @@ public class HomeActivity extends Activity {
         moPubView.loadAd();
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        Log.v(TAG, settings.getAll().toString());
         // set username to text
         String username = settings.getString("username", "");
-        Log.v(TAG, username);
         mTextView = (TextView) findViewById(R.id.name);
         mTextView.setText(username);
 
@@ -211,12 +209,9 @@ public class HomeActivity extends Activity {
             builder.setIncludeRTsEnabled(false);
             // Access Token
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, 0);
-            // Log.v(TAG, prefs.getAll().toString());
             String access_token = prefs.getString("token", "");
-            // Log.v(TAG, access_token);
             // Access Token Secret
             String access_token_secret = prefs.getString("secret", "");
-            //Log.v(TAG, access_token_secret);
 
             //
             // Try to retrieve some tweets.
@@ -226,13 +221,11 @@ public class HomeActivity extends Activity {
             Paging paging = new Paging().count(200);
             statuses = twitter.getHomeTimeline(paging);
             Log.v(TAG, "Got me some tweets");
-            Log.v(TAG, statuses.toString());
 
             for (twitter4j.Status status : statuses) {
                 // checkout Tweet.class / TweetAdapter for more info..
                 tweet_holder.add(new Tweet(status.getText(), status.getUser().getScreenName(), status.getUser().getBiggerProfileImageURL(), status.getCreatedAt().toString()));
             }
-            Log.v(TAG, tweet_holder.toString());
             return true;
         }
 

@@ -85,10 +85,13 @@ secrets.
   without queueing cache work.
 - `make check` also verifies profile image downloads log failures, guard failed
   decodes, and show the placeholder image on failure.
+- `make check` also rejects sensitive Logcat output containing OAuth preference
+  maps, profile values, timelines, or rendered tweet collections.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - The static checker also requires completed canonical plans under `docs/plans`.
 - GitHub Actions installs Ruby 3.3 and runs `make check` with pinned actions,
-  read-only permissions, and a bounded timeout.
+  read-only permissions, credential-free checkout, every-branch coverage, and
+  a bounded timeout.
 - `app/libs/SHA256SUMS` records and verifies every vendored advertising and
   social SDK JAR without attempting to revive the archival Android build.
 
@@ -139,6 +142,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   integrity boundary.
 - See `docs/plans/2026-06-10-image-cache-failure-cleanup.md` for transport and
   decode failure cache cleanup.
+- See `docs/plans/2026-06-12-sensitive-log-redaction.md` for the credential and
+  user-content logging boundary.
 
 ## Contributing
 
