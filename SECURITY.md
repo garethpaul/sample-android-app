@@ -45,6 +45,9 @@ Helpful reports include:
   permitted when they contain no credential or user-content values.
 - Caught exception objects, messages, and stack traces must not be written to
   Logcat; use fixed tagged failure events that do not expose diagnostic state.
+- OAuth tokens belong only in the private auth preferences. Logout must
+  synchronously clear both auth and profile preferences and remain on the
+  authenticated screen if either purge fails.
 
 ## Mobile Privacy Notes
 

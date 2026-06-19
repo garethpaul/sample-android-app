@@ -54,6 +54,8 @@ public class MainActivity extends Activity {
     static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";
     static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";
     static final String PREF_KEY_TWITTER_LOGIN = "boolean";
+    static final String AUTH_PREFS_NAME = "MyPref";
+    static final String PROFILE_PREFS_NAME = "TwitterProfile";
     static final String TWITTER_CALLBACK_URL = Const.TWITTER_CALLBACK_URL;
     static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
 
@@ -81,8 +83,6 @@ public class MainActivity extends Activity {
 
     // Shared Preferences
     private static SharedPreferences mSharedPreferences;
-    public static final String PREFS_NAME = "TwitterProfile";
-
     // Internet Connection detector
     private ConnectionDetector cd;
 
@@ -137,10 +137,10 @@ public class MainActivity extends Activity {
         lblUpdate = (TextView) findViewById(R.id.lblUpdate);
         lblUserName = (TextView) findViewById(R.id.lblUserName);
 
-        SharedPreferences twttr = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences twttr = getSharedPreferences(PROFILE_PREFS_NAME, MODE_PRIVATE);
 
         // Shared Preferences
-        mSharedPreferences = getApplicationContext().getSharedPreferences("MyPref", 0);
+        mSharedPreferences = getApplicationContext().getSharedPreferences(AUTH_PREFS_NAME, MODE_PRIVATE);
         /**
          * Twitter login button click event will call loginToTwitter() function
          * */
@@ -203,8 +203,6 @@ public class MainActivity extends Activity {
                     editor.putString("profile_pic", profile_pic);
                     editor.putString("screen_name", screen_name);
                     editor.putLong("userid", userID);
-                    editor.putString("token", accessToken.getToken());
-                    editor.putString("secret", accessToken.getTokenSecret());
                     editor.commit();
 
 
@@ -274,13 +272,10 @@ public class MainActivity extends Activity {
      * It will just clear the application shared preferences
      * */
     private void logoutFromTwitter() {
-
-        // Clear the shared preferences
-        Editor e = mSharedPreferences.edit();
-        e.remove(PREF_KEY_OAUTH_TOKEN);
-        e.remove(PREF_KEY_OAUTH_SECRET);
-        e.remove(PREF_KEY_TWITTER_LOGIN);
-        e.commit();
+        if (!clearTwitterSession(getApplicationContext())) {
+            Log.e(TAG, "Failed to clear Twitter session");
+            return;
+        }
 
         // After this take the appropriate action
         // I am showing the hiding/showing buttons again
@@ -293,6 +288,17 @@ public class MainActivity extends Activity {
         lblUserName.setVisibility(View.GONE);
 
         btnLoginTwitter.setVisibility(View.VISIBLE);
+    }
+
+    static boolean clearTwitterSession(android.content.Context context) {
+        SharedPreferences profilePreferences = context.getSharedPreferences(
+                PROFILE_PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences authPreferences = context.getSharedPreferences(
+                AUTH_PREFS_NAME, MODE_PRIVATE);
+
+        boolean profileCleared = profilePreferences.edit().clear().commit();
+        boolean authCleared = authPreferences.edit().clear().commit();
+        return profileCleared && authCleared;
     }
 
     /**
