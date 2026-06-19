@@ -741,7 +741,7 @@ if File.exist?(image_loader_path)
     failures << "#{image_loader_path} must branch on stream-copy success before decoding cached images"
   end
   unless image_loader_source.include?('copied = Utils.CopyStream(is, os);') &&
-         image_loader_source.include?('if(!copied)')
+         image_loader_source.match?(/if\s*\(\s*!\s*copied\s*\)\s*\{\s*deleteQuietly\(f\);\s*return null;\s*\}/m)
     failures << "#{image_loader_path} must stop decoding when an image cache write fails"
   end
   unless image_loader_source.include?('deleteQuietly(f);') &&
