@@ -2,10 +2,9 @@
 
 ## 2026-06-21
 
-- Isolated Make verification authority from caller-controlled preload files,
-  file lists, shells, shell flags, Ruby commands, and repository roots, with 54
-  target/authority regression cases, inert Gradle configuration probes, and
-  explicit rejection coverage.
+- Isolated Make verification authority from caller-controlled file lists,
+  shells, shell flags, Ruby variables, repository roots, and trailing target
+  replacements, with explicit GNU Make preload-boundary coverage.
 
 ## 2026-06-17
 

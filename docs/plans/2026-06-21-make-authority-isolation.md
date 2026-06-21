@@ -6,8 +6,9 @@
 
 The protected repository root prevented `ROOT=/tmp` from redirecting checks,
 but GNU Make still accepted caller-controlled `MAKEFILES`, `MAKEFILE_LIST`,
-`SHELL`, `.SHELLFLAGS`, and `RUBY`. Those channels could preload arbitrary Make
-logic, replace the recipe shell, or turn the Android contract into a no-op.
+`SHELL`, `.SHELLFLAGS`, and `RUBY`. Those channels could replace the recipe
+shell or turn the Android contract into a no-op; GNU Make startup inputs also
+needed explicit detection and documented limits.
 
 ## Requirements
 
@@ -19,18 +20,27 @@ logic, replace the recipe shell, or turn the Android contract into a no-op.
 
 ## Implementation
 
-- Hardened Make authority before any target definitions are evaluated.
+- Hardened Make authority before target recipes can run and added deferred
+  validation after every Makefile has been parsed.
 - Added `root-test` with an isolated checkout containing quotes, spaces, and
   command-substitution syntax in its path.
 - Covered all six public targets across nine authority modes, plus explicit
-  inert configuration-data, `MAKEFILES`, `MAKEFILE_LIST`, and multiple-Makefile
-  cases.
+  inert configuration-data, `MAKEFILES`, `MAKEFILE_LIST`, and preceding and
+  trailing multiple-Makefile cases.
 - Kept the legacy Android build opt-in and did not change application behavior.
+- Kept Ruby discovery on the provisioned `PATH`; local callers must treat that
+  path as trusted.
+- Recorded the GNU Make startup boundary: a `MAKEFILES` preload is parsed before
+  this Makefile can reject it, so the guard prevents repository recipes but
+  cannot undo preload side effects.
+- Added a literal `$()` checkout-path probe that fails closed without executing
+  the apparent command substitution.
 
 ## Verification
 
 - `make root-test` passed 54 target/authority cases, two inert
-  configuration-data cases, and four rejection cases.
+  configuration-data cases, a detected preload startup, and five rejection cases.
+- The literal `$()` checkout-path case failed closed without creating its marker.
 - `make check` passed from the repository and through an absolute Makefile path.
 - Ruby and shell syntax checks, `git diff --check`, and repository integrity
   screening passed.
