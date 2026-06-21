@@ -13,7 +13,9 @@ check` can redirect those gates away from the checkout.
 
 - **R1:** Prevent command-line and environment values from replacing the
   Makefile-derived repository root.
-- **R2:** Keep `RUBY`, `RUN_LEGACY_GRADLE`, and `ANDROID_HOME` configurable.
+- **R2:** Keep `RUN_LEGACY_GRADLE` and `ANDROID_HOME` configurable. Ruby was
+  subsequently fixed by the Make authority-isolation follow-up because it is
+  part of the repository-owned verification boundary.
 - **R3:** Require the exact protected declaration in the Android checker.
 - **R4:** Prove every public Make alias from the checkout and an external
   directory with a hostile `ROOT` argument.

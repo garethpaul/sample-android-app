@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-21
+
+- Isolated Make verification authority from caller-controlled file lists,
+  shells, shell flags, Ruby variables, repository roots, and trailing target
+  replacements, with explicit GNU Make preload-boundary coverage.
+
 ## 2026-06-17
 
 - Made successful logout remove the authenticated Home activity from the back stack
