@@ -20,6 +20,7 @@ sensitive_log_plan = 'docs/plans/2026-06-12-sensitive-log-redaction.md'
 logout_credential_plan = 'docs/plans/2026-06-13-logout-credential-purge.md'
 oauth_callback_plan = 'docs/plans/2026-06-13-oauth-callback-correlation.md'
 make_root_plan = 'docs/plans/2026-06-14-make-root-override-protection.md'
+make_authority_plan = 'docs/plans/2026-06-21-make-authority-isolation.md'
 oauth_callback_address_plan = 'docs/plans/2026-06-14-oauth-callback-address-integrity.md'
 oauth_request_token_consumption_plan = 'docs/plans/2026-06-14-oauth-request-token-consumption.md'
 oauth_request_token_retry_reset_plan = 'docs/plans/2026-06-15-oauth-request-token-retry-reset.md'
@@ -38,6 +39,7 @@ failures << "#{sensitive_log_plan} is missing" unless File.exist?(sensitive_log_
 failures << "#{logout_credential_plan} is missing" unless File.exist?(logout_credential_plan)
 failures << "#{oauth_callback_plan} is missing" unless File.exist?(oauth_callback_plan)
 failures << "#{make_root_plan} is missing" unless File.exist?(make_root_plan)
+failures << "#{make_authority_plan} is missing" unless File.exist?(make_authority_plan)
 failures << "#{oauth_callback_address_plan} is missing" unless File.exist?(oauth_callback_address_plan)
 failures << "#{oauth_request_token_consumption_plan} is missing" unless File.exist?(oauth_request_token_consumption_plan)
 failures << "#{oauth_request_token_retry_reset_plan} is missing" unless File.exist?(oauth_request_token_retry_reset_plan)
@@ -56,10 +58,43 @@ docs_plans.each do |plan_path|
 end
 
 makefile = File.read('Makefile')
-root_declaration = 'override ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))'
+root_declaration = %q(override ROOT := $(shell path='$(subst ','"'"',$(MAKEFILE_LIST))'; path=$$(printf '%s' "$$path" | /bin/sed 's/^ //'); [ -f "$$path" ] || exit 1; directory=$$(/usr/bin/dirname -- "$$path"); CDPATH= cd -- "$$directory" && /bin/pwd -P))
 root_assignments = makefile.lines.map(&:chomp).grep(/\A(?:override\s+)?ROOT\s*[:?+]?=/)
-unless makefile.start_with?("#{root_declaration}\n") && root_assignments == [root_declaration]
-  failures << 'Makefile must define exactly one protected repository-derived ROOT declaration first'
+required_make_authority = [
+  'override SHELL := /bin/sh',
+  'override .SHELLFLAGS := -c',
+  'override RUBY := ruby',
+  '$(error MAKEFILES must be empty; repository verification requires this Makefile to be loaded alone)',
+  'override MAKEFILES :=',
+  '$(error MAKEFILE_LIST must not be overridden)',
+  root_declaration,
+  'export ROOT',
+  'export RUN_LEGACY_GRADLE',
+  'export ANDROID_HOME',
+  '$(error repository Makefile path could not be resolved)',
+  'root-test:',
+  "\t/bin/sh \"$$ROOT/scripts/test-makefile-root.sh\"",
+  'verify: root-test lint test build'
+]
+unless root_assignments == [root_declaration] && required_make_authority.all? { |line| makefile.lines.map(&:chomp).include?(line) }
+  failures << 'Makefile must preserve the isolated repository-owned verification authority contract'
+end
+
+root_test = 'scripts/test-makefile-root.sh'
+if File.exist?(root_test)
+  root_test_text = File.read(root_test)
+  ['54 executed target/authority cases', '2 inert configuration-data cases', 'MAKEFILE_LIST must not be overridden', 'MAKEFILES must be empty', 'repository Makefile path could not be resolved'].each do |evidence|
+    failures << "#{root_test} must preserve #{evidence.inspect}" unless root_test_text.include?(evidence)
+  end
+else
+  failures << "#{root_test} is missing"
+end
+
+if File.exist?(make_authority_plan)
+  authority_plan = File.read(make_authority_plan)
+  ['Status: Completed', '`make root-test` passed 54 target/authority cases', '`make check` passed from the repository and through an absolute Makefile path'].each do |evidence|
+    failures << "#{make_authority_plan} must record verification evidence #{evidence.inspect}" unless authority_plan.include?(evidence)
+  end
 end
 
 if File.exist?(make_root_plan)

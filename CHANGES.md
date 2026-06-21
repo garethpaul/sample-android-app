@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-21
+
+- Isolated Make verification authority from caller-controlled preload files,
+  file lists, shells, shell flags, Ruby commands, and repository roots, with 54
+  target/authority regression cases, inert Gradle configuration probes, and
+  explicit rejection coverage.
+
 ## 2026-06-17
 
 - Made successful logout remove the authenticated Home activity from the back stack

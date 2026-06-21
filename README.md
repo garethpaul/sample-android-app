@@ -103,6 +103,9 @@ secrets.
 - Successful logout must remove the authenticated Home activity from the back stack
   after credentials are cleared and login navigation starts.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
+- `make root-test` proves every public Make target keeps its repository root,
+  shell, shell flags, and Ruby checker under repository control while rejecting
+  preload and file-list overrides and treating Gradle configuration as data.
 - The static checker also requires completed canonical plans under `docs/plans`.
 - GitHub Actions installs Ruby 3.3 and runs `make check` with pinned actions,
   read-only permissions, credential-free checkout, every-branch coverage, and
@@ -167,6 +170,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   request-token callback correlation before exchange.
 - See `docs/plans/2026-06-14-make-root-override-protection.md` for the
   caller-resistant, location-independent Android validation root.
+- See `docs/plans/2026-06-21-make-authority-isolation.md` for isolated Make
+  authority and hostile-input regression coverage.
 - See `docs/plans/2026-06-14-oauth-callback-address-integrity.md` for exact
   callback authority and path validation before token exchange.
 - See `docs/plans/2026-06-14-oauth-request-token-consumption.md` for one-shot
