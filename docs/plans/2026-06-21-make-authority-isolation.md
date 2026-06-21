@@ -33,14 +33,14 @@ needed explicit detection and documented limits.
 - Recorded the GNU Make startup boundary: a `MAKEFILES` preload is parsed before
   this Makefile can reject it, so the guard prevents repository recipes but
   cannot undo preload side effects.
-- Added a literal `$()` checkout-path probe that fails closed without executing
-  the apparent command substitution.
+- Added a literal `$()` checkout-path probe that verifies the apparent command
+  substitution never executes across platform-specific GNU Make path handling.
 
 ## Verification
 
 - `make root-test` passed 54 target/authority cases, two inert
   configuration-data cases, a detected preload startup, and five rejection cases.
-- The literal `$()` checkout-path case failed closed without creating its marker.
+- The literal `$()` checkout-path case did not create its marker.
 - `make check` passed from the repository and through an absolute Makefile path.
 - Ruby and shell syntax checks, `git diff --check`, and repository integrity
   screening passed.
