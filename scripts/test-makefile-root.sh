@@ -36,6 +36,12 @@ printf '%s|%s|root-test\n' "$PWD" "$0" >> "$SAMPLE_ANDROID_COMMAND_LOG"
 EOF
 chmod +x "$CHECKOUT/scripts/test-makefile-root.sh"
 
+cat >"$CHECKOUT/scripts/test-timeline-publication.sh" <<'EOF'
+#!/bin/sh
+printf '%s|%s|timeline-publication-test\n' "$PWD" "$0" >> "$SAMPLE_ANDROID_COMMAND_LOG"
+EOF
+chmod +x "$CHECKOUT/scripts/test-timeline-publication.sh"
+
 BAD_COMMAND="$TEMP_ROOT/bad-command"
 cat >"$BAD_COMMAND" <<EOF
 #!/bin/sh

@@ -26,8 +26,11 @@ export ANDROID_HOME
 
 lint:
 	cd "$$ROOT" && $(RUBY) scripts/check_android_contract.rb
+	cd "$$ROOT" && $(RUBY) scripts/check_timeline_refresh.rb
 
 test: lint
+	/bin/sh "$$ROOT/scripts/test-timeline-publication.sh"
+	cd "$$ROOT" && $(RUBY) scripts/test-timeline-refresh-mutations.rb
 
 build:
 	@if [ "$$RUN_LEGACY_GRADLE" = "1" ]; then \
