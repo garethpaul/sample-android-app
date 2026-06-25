@@ -15,6 +15,10 @@ final class TimelinePublication<T> {
         return currentRevision;
     }
 
+    void invalidate() {
+        currentRevision += 1;
+    }
+
     boolean publish(long revision, boolean successful, List<T> fetchedRows) {
         if (revision != currentRevision) {
             return false;

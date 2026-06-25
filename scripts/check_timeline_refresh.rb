@@ -47,8 +47,34 @@ if failures.empty?
 
   failures << 'timeline publication must reject stale revisions' unless
     publication.match?(/if\s*\(\s*revision\s*!=\s*currentRevision\s*\)\s*\{\s*return\s+false\s*;/m)
+  failures << 'timeline publication must support lifecycle invalidation' unless
+    publication.match?(/void\s+invalidate\s*\(\s*\)\s*\{\s*currentRevision\s*\+=\s*1\s*;\s*\}/m)
   replacement = publication.match(/if\s*\(\s*successful\s*\)\s*\{\s*displayedRows\s*\.\s*clear\s*\(\s*\)\s*;\s*displayedRows\s*\.\s*addAll\s*\(\s*fetchedRows\s*\)\s*;\s*\}\s*return\s+true\s*;/m)
   failures << 'current completion must be accepted while only success replaces displayed rows' unless replacement
+
+  logout = home.match(/private\s+void\s+logoutFromTwitter\s*\(\s*\)\s*\{(?<body>.*?)^    \}/m)
+  if logout
+    invalidate = logout[:body].index('timelinePublication.invalidate();')
+    navigation = logout[:body].index('startActivity(goToNextActivity);')
+    failures << 'successful logout must invalidate pending timeline publication before navigation' unless
+      invalidate && navigation && invalidate < navigation
+  else
+    failures << 'HomeActivity must keep logout lifecycle handling'
+  end
+
+  destroy = home.match(/protected\s+void\s+onDestroy\s*\(\s*\)\s*\{(?<body>.*?)^    \}/m)
+  if destroy
+    destroy_body = destroy[:body]
+    invalidate = destroy_body.index('timelinePublication.invalidate();')
+    null_guard = destroy_body.index('if (moPubView != null)')
+    ad_destroy = destroy_body.index('moPubView.destroy();')
+    super_destroy = destroy_body.index('super.onDestroy();')
+    failures << 'Home teardown must invalidate timeline publication and destroy the initialized ad view' unless
+      invalidate && null_guard && ad_destroy && super_destroy &&
+      invalidate < null_guard && null_guard < ad_destroy && ad_destroy < super_destroy
+  else
+    failures << 'HomeActivity must keep lifecycle teardown'
+  end
 end
 
 if failures.empty?

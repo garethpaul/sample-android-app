@@ -168,6 +168,7 @@ public class HomeActivity extends Activity {
             Log.e(TAG, "Failed to clear Twitter session");
             return;
         }
+        timelinePublication.invalidate();
         Intent goToNextActivity = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(goToNextActivity);
         finish();
@@ -254,6 +255,16 @@ public class HomeActivity extends Activity {
         }
 
     };
+
+    @Override
+    protected void onDestroy() {
+        timelinePublication.invalidate();
+        if (moPubView != null) {
+            moPubView.destroy();
+        }
+        super.onDestroy();
+    }
+
     private class GetXMLTask extends AsyncTask<String, Void, Bitmap> {
         @Override
         protected Bitmap doInBackground(String... urls) {
