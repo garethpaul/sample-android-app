@@ -77,9 +77,9 @@ public class HomeActivity extends Activity {
     // setup logging
     private static String TAG = Const.TAG;
 
-    // Statuses
-    List<Status> statuses = new ArrayList<Status>();
     final ArrayList<Tweet> tweet_holder = new ArrayList<Tweet>();
+    final TimelinePublication<Tweet> timelinePublication =
+            new TimelinePublication<Tweet>(tweet_holder);
 
     private ImageView imageView;
     private ImageView LogOut;
@@ -174,17 +174,19 @@ public class HomeActivity extends Activity {
 
     }
     private class GetTweets extends AsyncTask<String, Void, Boolean>{
+        private final long revision = timelinePublication.begin();
+        private final ArrayList<Tweet> fetchedTweets = new ArrayList<Tweet>();
 
 
         @Override
         protected Boolean doInBackground(String... params) {
             try {
                 Log.v(TAG,"Attempting to bring the tweets home");
-                bringTweets();
+                return bringTweets();
             } catch (TwitterException ex) {
                 Log.e(TAG, "Issue bringing tweets back home");
+                return false;
             }
-            return null;
         }
 
         @Override
@@ -219,12 +221,12 @@ public class HomeActivity extends Activity {
             AccessToken accessToken = new AccessToken(access_token, access_token_secret);
             Twitter twitter = new TwitterFactory(builder.build()).getInstance(accessToken);
             Paging paging = new Paging().count(200);
-            statuses = twitter.getHomeTimeline(paging);
+            List<Status> statuses = twitter.getHomeTimeline(paging);
             Log.v(TAG, "Got me some tweets");
 
             for (twitter4j.Status status : statuses) {
                 // checkout Tweet.class / TweetAdapter for more info..
-                tweet_holder.add(new Tweet(status.getText(), status.getUser().getScreenName(), status.getUser().getBiggerProfileImageURL(), status.getCreatedAt().toString()));
+                fetchedTweets.add(new Tweet(status.getText(), status.getUser().getScreenName(), status.getUser().getBiggerProfileImageURL(), status.getCreatedAt().toString()));
             }
             return true;
         }
@@ -233,16 +235,22 @@ public class HomeActivity extends Activity {
         public void onPostExecute(Boolean r){
             // do something when done..
             //Log.v(TAG, "Tweets have come home now let's put them to bed");
+            boolean successful = Boolean.TRUE.equals(r);
+            if (!timelinePublication.publish(revision, successful, fetchedTweets)) {
+                return;
+            }
+
             ProgressBar pb = (ProgressBar)findViewById(R.id.progressBar);
             HomeActivity.this.progress.setVisibility(View.INVISIBLE);
             loading = (TextView) findViewById(R.id.loading);
             loading.setVisibility(View.INVISIBLE);
 
-
-            TweetAdapter adapter = new TweetAdapter(HomeActivity.this, HomeActivity.this,
-                    R.layout.list, tweet_holder);
-            ListView lv = (ListView) findViewById(R.id.listView);
-            lv.setAdapter(adapter);
+            if (successful) {
+                TweetAdapter adapter = new TweetAdapter(HomeActivity.this, HomeActivity.this,
+                        R.layout.list, tweet_holder);
+                ListView lv = (ListView) findViewById(R.id.listView);
+                lv.setAdapter(adapter);
+            }
         }
 
     };
