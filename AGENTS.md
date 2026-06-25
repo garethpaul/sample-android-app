@@ -51,6 +51,8 @@
 - See `VISION.md` for project direction and contribution guardrails.
 - See `docs/plans/2026-06-08-sample-android-app-baseline.md` for the canonical Android sample contract baseline.
 - See `docs/plans/2026-06-08-disable-app-backup.md` for the manifest backup privacy guard.
+- Home teardown and successful logout invalidate pending timeline publications;
+  teardown also destroys the initialized ad view.
 
 ## Agent workflow
 

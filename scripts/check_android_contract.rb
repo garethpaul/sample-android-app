@@ -27,6 +27,7 @@ oauth_request_token_retry_reset_plan = 'docs/plans/2026-06-15-oauth-request-toke
 oauth_session_persistence_plan = 'docs/plans/2026-06-16-oauth-session-persistence.md'
 oauth_session_integrity_plan = 'docs/plans/2026-06-16-oauth-session-integrity.md'
 logout_back_stack_plan = 'docs/plans/2026-06-17-logout-back-stack-revocation.md'
+home_lifecycle_plan = 'docs/plans/2026-06-25-home-timeline-lifecycle.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -46,6 +47,7 @@ failures << "#{oauth_request_token_retry_reset_plan} is missing" unless File.exi
 failures << "#{oauth_session_persistence_plan} is missing" unless File.exist?(oauth_session_persistence_plan)
 failures << "#{oauth_session_integrity_plan} is missing" unless File.exist?(oauth_session_integrity_plan)
 failures << "#{logout_back_stack_plan} is missing" unless File.exist?(logout_back_stack_plan)
+failures << "#{home_lifecycle_plan} is missing" unless File.exist?(home_lifecycle_plan)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -256,6 +258,16 @@ project_docs.each do |path, required_phrases|
   else
     failures << "#{path} is missing"
   end
+end
+
+['README.md', 'VISION.md', 'SECURITY.md', 'CHANGES.md'].each do |path|
+  normalized_text = File.read(path).gsub(/\s+/, ' ')
+  unless normalized_text.include?('invalidate pending timeline publications')
+    failures << "#{path} must document Home timeline lifecycle invalidation"
+  end
+end
+unless File.read('README.md').include?(home_lifecycle_plan)
+  failures << "README.md must index #{home_lifecycle_plan}"
 end
 
 unless File.executable?('gradlew')

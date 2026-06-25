@@ -1,5 +1,25 @@
 # Changes
 
+## 2026-06-25T21:10:35Z — P1 privacy/correctness — cycle: Home timeline lifecycle
+
+- Threads: inspected the explicit Apache 2.0 license, default branch, open pull
+  requests and issues, hosted checks, OAuth session entry and logout, timeline
+  refresh revision ownership, Activity teardown, profile image work, ad
+  lifecycle, static contracts, Java harnesses, and hostile mutations.
+- Bug fixed: successful logout and Home teardown now invalidate pending timeline
+  publications before stale callbacks can replace visible account rows; teardown
+  also destroys the initialized Home ad view.
+- Files: `HomeActivity.java`, `TimelinePublication.java`, timeline source and
+  mutation tests, Android contracts, lifecycle documentation, and
+  `docs/plans/2026-06-25-home-timeline-lifecycle.md`.
+- Validation: reproduced the missing invalidation API as a Java compile failure,
+  then passed the Java 7 publication harness, source checker, and fourteen
+  hostile timeline mutations.
+- Blockers: the legacy Android SDK/Gradle application was not executed locally;
+  hosted Ruby/JDK contract verification remains required before merge.
+- Next: verify logout during a slow timeline fetch and Activity destruction in
+  an emulator while observing that no stale adapter or ad callback is retained.
+
 ## 2026-06-25
 
 - Replaced displayed timeline rows atomically after successful refreshes,

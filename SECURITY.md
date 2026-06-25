@@ -57,6 +57,8 @@ Helpful reports include:
   OAuth token values are present, including direct or restored Home entry.
 - Successful logout must remove the authenticated Home activity from the back stack
   so Back cannot reveal previously loaded account content.
+- Home teardown and successful logout invalidate pending timeline publications;
+  teardown also destroys the initialized ad view.
 
 ## Mobile Privacy Notes
 

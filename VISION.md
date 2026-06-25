@@ -45,6 +45,8 @@ Priority:
   navigation and clear partial session state on persistence failure
 - Require complete persisted OAuth credentials before authenticated entry
 - On successful logout, remove the authenticated Home activity from the back stack
+- Home teardown and successful logout invalidate pending timeline publications;
+  teardown also destroys the initialized ad view
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:

@@ -33,6 +33,7 @@ public final class TimelinePublicationTest {
         testParallelStaleFailureThenCurrentSuccess();
         testParallelStaleFailureThenCurrentFailure();
         testParallelCurrentSuccessThenStaleFailure();
+        testInvalidatedCompletionIsStale();
 
         System.out.println("Timeline publication tests passed");
     }
@@ -115,6 +116,16 @@ public final class TimelinePublicationTest {
         harness.assertState(false, 1, "newest");
     }
 
+    private static void testInvalidatedCompletionIsStale() {
+        CompletionHarness harness = new CompletionHarness("existing");
+        long pending = harness.begin();
+
+        harness.invalidate();
+        harness.complete(pending, true, rows("stale"));
+
+        harness.assertState(true, 0, "existing");
+    }
+
     private static final class CompletionHarness {
         private final ArrayList<String> displayed = new ArrayList<String>();
         private final TimelinePublication<String> publication =
@@ -129,6 +140,10 @@ public final class TimelinePublicationTest {
         long begin() {
             loading = true;
             return publication.begin();
+        }
+
+        void invalidate() {
+            publication.invalidate();
         }
 
         void complete(long revision, boolean successful, ArrayList<String> rows) {

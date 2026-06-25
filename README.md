@@ -102,6 +102,8 @@ secrets.
   token and secret; incomplete Home sessions redirect before network work.
 - Successful logout must remove the authenticated Home activity from the back stack
   after credentials are cleared and login navigation starts.
+- Home teardown and successful logout invalidate pending timeline publications;
+  teardown also destroys the initialized ad view.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - `make root-test` proves every public Make target keeps its repository root,
   shell, shell flags, and Ruby checker under repository control while rejecting
@@ -184,6 +186,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   OAuth credential checks at both authenticated entry points.
 - See `docs/plans/2026-06-17-logout-back-stack-revocation.md` for revoking the
   authenticated Home activity after successful logout.
+- See `docs/plans/2026-06-25-home-timeline-lifecycle.md` for timeline
+  invalidation and Home ad teardown.
 
 ## Contributing
 
