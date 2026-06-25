@@ -1,5 +1,13 @@
 # Changes
 
+## 2026-06-25
+
+- Replaced displayed timeline rows atomically after successful refreshes,
+  preserved the previous rows after failures, and ignored stale overlapping
+  completions without hiding the active request's loading state.
+- Added SDK-free Java behavior tests, static source checks, and hostile mutation
+  coverage for timeline publication and refresh wiring.
+
 ## 2026-06-21
 
 - Isolated Make verification authority from caller-controlled file lists,
