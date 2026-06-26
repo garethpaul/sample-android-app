@@ -80,6 +80,8 @@ public class HomeActivity extends Activity {
     final ArrayList<Tweet> tweet_holder = new ArrayList<Tweet>();
     final TimelinePublication<Tweet> timelinePublication =
             new TimelinePublication<Tweet>(tweet_holder);
+    final ProfileImagePublication profileImagePublication =
+            new ProfileImagePublication();
 
     private ImageView imageView;
     private ImageView LogOut;
@@ -88,6 +90,7 @@ public class HomeActivity extends Activity {
     private TextView mTextView;
     private ProgressBar progress;
     private MoPubView moPubView;
+    private GetXMLTask profileImageTask;
 
 
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)
@@ -131,8 +134,8 @@ public class HomeActivity extends Activity {
         progress = (ProgressBar) findViewById(R.id.progressBar);
         progress.setVisibility(View.VISIBLE);
 
-        GetXMLTask task = new GetXMLTask();
-        task.execute(new String[] { twitter_pic});
+        profileImageTask = new GetXMLTask();
+        profileImageTask.execute(new String[] { twitter_pic});
 
         // Refresh Stream
         refresh = (ImageView) findViewById(R.id.refresh);
@@ -169,6 +172,7 @@ public class HomeActivity extends Activity {
             return;
         }
         timelinePublication.invalidate();
+        invalidateProfileImageTask();
         Intent goToNextActivity = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(goToNextActivity);
         finish();
@@ -259,17 +263,31 @@ public class HomeActivity extends Activity {
     @Override
     protected void onDestroy() {
         timelinePublication.invalidate();
+        invalidateProfileImageTask();
         if (moPubView != null) {
             moPubView.destroy();
         }
         super.onDestroy();
     }
 
+    private void invalidateProfileImageTask() {
+        profileImagePublication.invalidate();
+        if (profileImageTask != null) {
+            profileImageTask.cancel(true);
+            profileImageTask = null;
+        }
+    }
+
     private class GetXMLTask extends AsyncTask<String, Void, Bitmap> {
+        private final long revision = profileImagePublication.begin();
+
         @Override
         protected Bitmap doInBackground(String... urls) {
             Bitmap map = null;
             for (String url : urls) {
+                if (isCancelled()) {
+                    return null;
+                }
                 map = downloadImage(url);
             }
             return map;
@@ -278,6 +296,12 @@ public class HomeActivity extends Activity {
         // Sets the Bitmap returned by doInBackground
         @Override
         protected void onPostExecute(Bitmap result) {
+            if (profileImageTask == this) {
+                profileImageTask = null;
+            }
+            if (isCancelled() || !profileImagePublication.canPublish(revision)) {
+                return;
+            }
             if(result != null)
                 imageView.setImageBitmap(result);
             else
@@ -288,13 +312,18 @@ public class HomeActivity extends Activity {
         private Bitmap downloadImage(String url) {
             Bitmap bitmap = null;
             InputStream stream = null;
+            HttpURLConnection httpConnection = null;
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inSampleSize = 1;
 
             try {
-                stream = getHttpConnection(url);
-                if(stream == null)
+                httpConnection = getHttpConnection(url);
+                if(httpConnection == null)
                     return null;
+                httpConnection.connect();
+                if (httpConnection.getResponseCode() != HttpURLConnection.HTTP_OK)
+                    return null;
+                stream = httpConnection.getInputStream();
                 bitmap = BitmapFactory.
                         decodeStream(stream, null, bmOptions);
             } catch (IOException ex) {
@@ -307,6 +336,9 @@ public class HomeActivity extends Activity {
                     } catch (IOException ex) {
                         Log.e(TAG, "Failed to close profile image stream");
                     }
+                }
+                if(httpConnection != null) {
+                    httpConnection.disconnect();
                 }
             }
             if(bitmap == null)
@@ -340,21 +372,16 @@ public class HomeActivity extends Activity {
         }
 
 
-        // Makes HttpURLConnection and returns InputStream
-        private InputStream getHttpConnection(String urlString)
+        // Configures the task-owned profile image connection.
+        private HttpURLConnection getHttpConnection(String urlString)
                 throws IOException {
             URL url = new URL(urlString);
             URLConnection connection = url.openConnection();
             HttpURLConnection httpConnection = (HttpURLConnection) connection;
             httpConnection.setRequestMethod("GET");
-            httpConnection.connect();
-
-            if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                return httpConnection.getInputStream();
-            }
-
-            httpConnection.disconnect();
-            return null;
+            httpConnection.setConnectTimeout(30000);
+            httpConnection.setReadTimeout(30000);
+            return httpConnection;
         }
 
         private class StableArrayAdapter extends ArrayAdapter<String> {

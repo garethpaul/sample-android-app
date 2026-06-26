@@ -28,6 +28,8 @@ oauth_session_persistence_plan = 'docs/plans/2026-06-16-oauth-session-persistenc
 oauth_session_integrity_plan = 'docs/plans/2026-06-16-oauth-session-integrity.md'
 logout_back_stack_plan = 'docs/plans/2026-06-17-logout-back-stack-revocation.md'
 home_lifecycle_plan = 'docs/plans/2026-06-25-home-timeline-lifecycle.md'
+profile_image_design = 'docs/plans/2026-06-25-profile-image-lifecycle-design.md'
+profile_image_plan = 'docs/plans/2026-06-25-profile-image-lifecycle.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -48,6 +50,20 @@ failures << "#{oauth_session_persistence_plan} is missing" unless File.exist?(oa
 failures << "#{oauth_session_integrity_plan} is missing" unless File.exist?(oauth_session_integrity_plan)
 failures << "#{logout_back_stack_plan} is missing" unless File.exist?(logout_back_stack_plan)
 failures << "#{home_lifecycle_plan} is missing" unless File.exist?(home_lifecycle_plan)
+failures << "#{profile_image_design} is missing" unless File.exist?(profile_image_design)
+failures << "#{profile_image_plan} is missing" unless File.exist?(profile_image_plan)
+failures << 'ProfileImagePublication.java is missing' unless File.exist?(
+  'app/src/main/java/com/example/app/ProfileImagePublication.java'
+)
+failures << 'profile image publication test is missing' unless File.exist?(
+  'scripts/test-profile-image-publication.sh'
+)
+failures << 'profile image lifecycle checker is missing' unless File.exist?(
+  'scripts/check_profile_image_lifecycle.rb'
+)
+failures << 'profile image lifecycle mutation suite is missing' unless File.exist?(
+  'scripts/test-profile-image-lifecycle-mutations.rb'
+)
 failures << "#{ci_workflow} is missing" unless File.exist?(ci_workflow)
 failures << "#{codeowners} is missing" unless File.exist?(codeowners)
 failures << 'docs/plans must contain at least one completed plan' if docs_plans.empty?
@@ -84,6 +100,13 @@ unless root_assignments == [root_declaration] &&
        makefile.include?('build check lint root-test test verify: $$(if $$(shell') &&
        makefile.include?('$$(error repository Makefile must be loaded alone))')
   failures << 'Makefile must preserve the isolated repository-owned verification authority contract'
+end
+[
+  'cd "$$ROOT" && $(RUBY) scripts/check_profile_image_lifecycle.rb',
+  '/bin/sh "$$ROOT/scripts/test-profile-image-publication.sh"',
+  'cd "$$ROOT" && $(RUBY) scripts/test-profile-image-lifecycle-mutations.rb'
+].each do |command|
+  failures << "Makefile must execute #{command}" unless makefile.include?(command)
 end
 
 root_test = 'scripts/test-makefile-root.sh'
@@ -266,8 +289,17 @@ end
     failures << "#{path} must document Home timeline lifecycle invalidation"
   end
 end
+['README.md', 'VISION.md', 'SECURITY.md', 'CHANGES.md'].each do |path|
+  normalized_text = File.read(path).gsub(/\s+/, ' ')
+  unless normalized_text.include?('invalidate pending profile image publications')
+    failures << "#{path} must document Home profile image lifecycle invalidation"
+  end
+end
 unless File.read('README.md').include?(home_lifecycle_plan)
   failures << "README.md must index #{home_lifecycle_plan}"
+end
+unless File.read('README.md').include?(profile_image_plan)
+  failures << "README.md must index #{profile_image_plan}"
 end
 
 unless File.executable?('gradlew')

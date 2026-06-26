@@ -59,6 +59,9 @@ Helpful reports include:
   so Back cannot reveal previously loaded account content.
 - Home teardown and successful logout invalidate pending timeline publications;
   teardown also destroys the initialized ad view.
+- Home teardown and successful logout invalidate pending profile image publications,
+  cancel the active task, reject stale UI completion, and bound HTTP retention
+  with connect/read timeouts plus deterministic disconnect.
 
 ## Mobile Privacy Notes
 

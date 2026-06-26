@@ -104,6 +104,9 @@ secrets.
   after credentials are cleared and login navigation starts.
 - Home teardown and successful logout invalidate pending timeline publications;
   teardown also destroys the initialized ad view.
+- Home teardown and successful logout invalidate pending profile image publications,
+  cancel the active task, and reject stale UI completion. Profile image HTTP
+  work uses finite connect/read timeouts and disconnects after stream cleanup.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - `make root-test` proves every public Make target keeps its repository root,
   shell, shell flags, and Ruby checker under repository control while rejecting
@@ -188,6 +191,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   authenticated Home activity after successful logout.
 - See `docs/plans/2026-06-25-home-timeline-lifecycle.md` for timeline
   invalidation and Home ad teardown.
+- See `docs/plans/2026-06-25-profile-image-lifecycle.md` for profile image
+  publication invalidation, cancellation, and bounded connection ownership.
 
 ## Contributing
 

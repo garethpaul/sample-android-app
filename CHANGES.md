@@ -1,5 +1,23 @@
 # Changes
 
+## 2026-06-25T19:52:00-0700 — P1 lifecycle — profile image publication
+
+- Bug fixed: the Home profile image `AsyncTask` could outlive successful logout
+  or Activity teardown and publish into a destroyed screen.
+- Lifecycle: each task now captures a publication revision; logout and teardown
+  invalidate and cancel the active task before navigation or superclass teardown.
+- Home teardown and successful logout invalidate pending profile image publications.
+- Transport: profile image connections use 30-second connect/read timeouts,
+  close their stream, and disconnect deterministically.
+- Compatibility: current successful downloads still render rounded profile
+  images, while current failures still render the placeholder.
+- Tests: added a Java 7 publication harness, a Ruby source checker, and nine
+  hostile mutations covering stale publication, lifecycle invalidation,
+  cancellation, timeout, connection ownership, and disconnect boundaries.
+- Validation: focused RED/GREEN tests pass; full repository verification follows.
+- Next: run the complete repository gate, review the exact branch, and merge
+  only after hosted checks pass.
+
 ## 2026-06-25T21:10:35Z — P1 privacy/correctness — cycle: Home timeline lifecycle
 
 - Threads: inspected the explicit Apache 2.0 license, default branch, open pull
