@@ -32,4 +32,10 @@
 - The Home source checker failed on every lifecycle and transport contract
   before implementation, then passed after task ownership was added.
 - Nine isolated hostile mutations were rejected.
-- `make check` is the complete repository acceptance gate.
+- `make check` passed with 54 Makefile authority cases, both Java 7 behavior
+  harnesses, fourteen timeline mutations, and nine profile-image mutations.
+- Hosted Check runs `28213893556` and `28213894592` passed on commit
+  `4cf71aa2ea8cdba0fa59682516e10d20c5882ebf`.
+- Hosted CodeQL run `28213893861` passed for Actions, Java/Kotlin, and Ruby.
+- `codex review --base origin/master` was attempted but could not authenticate
+  to the OpenAI API (HTTP 401); manual exact-head review found no findings.
