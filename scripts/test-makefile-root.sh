@@ -42,6 +42,12 @@ printf '%s|%s|timeline-publication-test\n' "$PWD" "$0" >> "$SAMPLE_ANDROID_COMMA
 EOF
 chmod +x "$CHECKOUT/scripts/test-timeline-publication.sh"
 
+cat >"$CHECKOUT/scripts/test-profile-image-publication.sh" <<'EOF'
+#!/bin/sh
+printf '%s|%s|profile-image-publication-test\n' "$PWD" "$0" >> "$SAMPLE_ANDROID_COMMAND_LOG"
+EOF
+chmod +x "$CHECKOUT/scripts/test-profile-image-publication.sh"
+
 BAD_COMMAND="$TEMP_ROOT/bad-command"
 cat >"$BAD_COMMAND" <<EOF
 #!/bin/sh
