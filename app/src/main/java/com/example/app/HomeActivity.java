@@ -16,9 +16,9 @@ import java.util.HashMap;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -231,7 +231,7 @@ public class HomeActivity extends Activity {
 
             for (twitter4j.Status status : statuses) {
                 // checkout Tweet.class / TweetAdapter for more info..
-                fetchedTweets.add(new Tweet(status.getText(), status.getUser().getScreenName(), status.getUser().getBiggerProfileImageURL(), status.getCreatedAt().toString()));
+                fetchedTweets.add(new Tweet(status.getText(), status.getUser().getScreenName(), status.getUser().getBiggerProfileImageURLHttps(), status.getCreatedAt().toString()));
             }
             return true;
         }
@@ -312,7 +312,7 @@ public class HomeActivity extends Activity {
         private Bitmap downloadImage(String url) {
             Bitmap bitmap = null;
             InputStream stream = null;
-            HttpURLConnection httpConnection = null;
+            HttpsURLConnection httpConnection = null;
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inSampleSize = 1;
 
@@ -321,7 +321,7 @@ public class HomeActivity extends Activity {
                 if(httpConnection == null)
                     return null;
                 httpConnection.connect();
-                if (httpConnection.getResponseCode() != HttpURLConnection.HTTP_OK)
+                if (httpConnection.getResponseCode() != HttpsURLConnection.HTTP_OK)
                     return null;
                 stream = httpConnection.getInputStream();
                 bitmap = BitmapFactory.
@@ -373,11 +373,11 @@ public class HomeActivity extends Activity {
 
 
         // Configures the task-owned profile image connection.
-        private HttpURLConnection getHttpConnection(String urlString)
+        private HttpsURLConnection getHttpConnection(String urlString)
                 throws IOException {
-            URL url = new URL(urlString);
-            URLConnection connection = url.openConnection();
-            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+            URL url = SecureImageUrl.parse(urlString);
+            HttpsURLConnection httpConnection =
+                    (HttpsURLConnection) url.openConnection();
             httpConnection.setRequestMethod("GET");
             httpConnection.setConnectTimeout(30000);
             httpConnection.setReadTimeout(30000);

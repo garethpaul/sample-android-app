@@ -27,6 +27,7 @@ Priority:
 - Keep cached image decode streams closed after bitmap reads
 - Keep empty image URLs placeholder-backed without cache lookups
 - Keep profile image failures observable and placeholder-backed
+- Keep Twitter profile and timeline images on HTTPS-only transport
 - Keep fixed tagged failures observable without logging caught exception
   messages, throwable payloads, or stack traces
 - Avoid optional location and shared-storage permissions in the default sample

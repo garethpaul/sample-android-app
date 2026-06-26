@@ -62,6 +62,8 @@ Helpful reports include:
 - Home teardown and successful logout invalidate pending profile image publications,
   cancel the active task, reject stale UI completion, and bound HTTP retention
   with connect/read timeouts plus deterministic disconnect.
+- Twitter profile and timeline images use HTTPS-only transport; non-HTTPS and
+  malformed image URLs fail closed before a connection is opened.
 
 ## Mobile Privacy Notes
 

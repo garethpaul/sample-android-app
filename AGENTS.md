@@ -55,6 +55,8 @@
   teardown also destroys the initialized ad view.
 - Home teardown and successful logout invalidate pending profile image publications,
   cancel the active task, and keep its HTTP connection bounded and disconnected.
+- Twitter profile and timeline image URLs must use the HTTPS Twitter4J accessors
+  and pass `SecureImageUrl` before opening a connection.
 
 ## Agent workflow
 

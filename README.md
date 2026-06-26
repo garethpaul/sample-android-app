@@ -107,6 +107,8 @@ secrets.
 - Home teardown and successful logout invalidate pending profile image publications,
   cancel the active task, and reject stale UI completion. Profile image HTTP
   work uses finite connect/read timeouts and disconnects after stream cleanup.
+- Twitter profile and timeline images use HTTPS-only transport, including the
+  vendored Twitter4J HTTPS URL accessors and a shared non-HTTPS rejection guard.
 - `make check` also verifies local IDE metadata stays ignored and untracked.
 - `make root-test` proves every public Make target keeps its repository root,
   shell, shell flags, and Ruby checker under repository control while rejecting
@@ -193,6 +195,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   invalidation and Home ad teardown.
 - See `docs/plans/2026-06-25-profile-image-lifecycle.md` for profile image
   publication invalidation, cancellation, and bounded connection ownership.
+- See `docs/plans/2026-06-26-https-image-transport.md` for the shared image URL
+  policy and Twitter4J HTTPS accessor migration.
 
 ## Contributing
 

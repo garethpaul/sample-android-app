@@ -1,5 +1,25 @@
 # Changes
 
+## 2026-06-26T12:20:00Z — P1 transport security — HTTPS image URLs
+
+- Cycle: inspected the clean Apache-licensed legacy Android sample after its
+  timeline/profile lifecycle work and selected a transport boundary rather than
+  broad dependency or Gradle modernization.
+- Bug: both image loaders accepted generic URL schemes and cast generic
+  connections to HTTP, while Twitter profile and timeline records used the
+  cleartext-capable profile-image accessors.
+- Work: added HTTPS-only Twitter profile and timeline image transport through a
+  shared URL parser, `HttpsURLConnection`, and the vendored Twitter4J HTTPS
+  image methods.
+- Tests: a red-first SDK-free Java harness failed while `SecureImageUrl` was
+  absent, then covered HTTPS acceptance plus HTTP, file, malformed, and null
+  rejection.
+- Contracts: the Ruby baseline requires the behavior gate, both image-loader
+  call sites, HTTPS Twitter accessors, maintained guidance, and completed plan.
+- Validation: repository/external Make gates, Java harnesses, Ruby contracts,
+  hostile mutations, generated-artifact checks, and `git diff --check` are
+  recorded in the completed plan.
+
 ## 2026-06-25T19:52:00-0700 — P1 lifecycle — profile image publication
 
 - Bug fixed: the Home profile image `AsyncTask` could outlive successful logout

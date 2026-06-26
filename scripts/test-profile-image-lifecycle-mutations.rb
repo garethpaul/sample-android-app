@@ -32,7 +32,7 @@ mutations = {
   'disconnect removed' => [home_path,
     'httpConnection.disconnect();', 'httpConnection.getResponseCode();'],
   'connection ownership delayed' => [home_path,
-    "httpConnection = getHttpConnection(url);\n                if(httpConnection == null)\n                    return null;\n                httpConnection.connect();\n                if (httpConnection.getResponseCode() != HttpURLConnection.HTTP_OK)\n                    return null;\n                stream = httpConnection.getInputStream();",
+    "httpConnection = getHttpConnection(url);\n                if(httpConnection == null)\n                    return null;\n                httpConnection.connect();\n                if (httpConnection.getResponseCode() != HttpsURLConnection.HTTP_OK)\n                    return null;\n                stream = httpConnection.getInputStream();",
     "httpConnection = null;\n                stream = getHttpConnection(url).getInputStream();"]
 }
 
