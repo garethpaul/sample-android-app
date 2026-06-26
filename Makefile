@@ -27,10 +27,13 @@ export ANDROID_HOME
 lint:
 	cd "$$ROOT" && $(RUBY) scripts/check_android_contract.rb
 	cd "$$ROOT" && $(RUBY) scripts/check_timeline_refresh.rb
+	cd "$$ROOT" && $(RUBY) scripts/check_profile_image_lifecycle.rb
 
 test: lint
 	/bin/sh "$$ROOT/scripts/test-timeline-publication.sh"
+	/bin/sh "$$ROOT/scripts/test-profile-image-publication.sh"
 	cd "$$ROOT" && $(RUBY) scripts/test-timeline-refresh-mutations.rb
+	cd "$$ROOT" && $(RUBY) scripts/test-profile-image-lifecycle-mutations.rb
 
 build:
 	@if [ "$$RUN_LEGACY_GRADLE" = "1" ]; then \

@@ -1,5 +1,29 @@
 # Changes
 
+## 2026-06-25T19:52:00-0700 — P1 lifecycle — profile image publication
+
+- Bug fixed: the Home profile image `AsyncTask` could outlive successful logout
+  or Activity teardown and publish into a destroyed screen.
+- Lifecycle: each task now captures a publication revision; logout and teardown
+  invalidate and cancel the active task before navigation or superclass teardown.
+- Home teardown and successful logout invalidate pending profile image publications.
+- Transport: profile image connections use 30-second connect/read timeouts,
+  close their stream, and disconnect deterministically.
+- Compatibility: current successful downloads still render rounded profile
+  images, while current failures still render the placeholder.
+- Tests: added a Java 7 publication harness, a Ruby source checker, and nine
+  hostile mutations covering stale publication, lifecycle invalidation,
+  cancellation, timeout, connection ownership, and disconnect boundaries.
+- Validation: `make check` passed with 54 Makefile authority cases, both Java 7
+  behavior harnesses, fourteen timeline mutations, and nine profile-image
+  mutations. Hosted Check runs `28213893556` and `28213894592` and CodeQL run
+  `28213893861` passed on the reviewed head.
+- Review: the requested Codex review could not authenticate to the OpenAI API
+  (HTTP 401); manual exact-head correctness, security, and regression review
+  found no actionable findings.
+- Next: merge the final green hosted head, then verify logout during a slow
+  profile-image fetch in an emulator when a compatible Android SDK is available.
+
 ## 2026-06-25T21:10:35Z — P1 privacy/correctness — cycle: Home timeline lifecycle
 
 - Threads: inspected the explicit Apache 2.0 license, default branch, open pull

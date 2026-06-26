@@ -47,6 +47,8 @@ Priority:
 - On successful logout, remove the authenticated Home activity from the back stack
 - Home teardown and successful logout invalidate pending timeline publications;
   teardown also destroys the initialized ad view
+- Home teardown and successful logout invalidate pending profile image publications
+  and keep profile image transport bounded and task-owned
 - Treat the Android project structure and dependencies as legacy
 
 Next priorities:
