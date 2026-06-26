@@ -10,13 +10,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import android.app.Activity;
 import android.content.Context;
@@ -81,13 +82,13 @@ public class ImageLoader {
             return b;
 
         //from web
-        HttpURLConnection conn = null;
+        HttpsURLConnection conn = null;
         InputStream is = null;
         OutputStream os = null;
         boolean copied = false;
         try {
-            URL imageUrl = new URL(url);
-            conn = (HttpURLConnection)imageUrl.openConnection();
+            URL imageUrl = SecureImageUrl.parse(url);
+            conn = (HttpsURLConnection)imageUrl.openConnection();
             conn.setConnectTimeout(30000);
             conn.setReadTimeout(30000);
             conn.setInstanceFollowRedirects(true);

@@ -198,7 +198,7 @@ public class MainActivity extends Activity {
                     long userID = accessToken.getUserId();
                     User user = twitter.showUser(userID);
                     String username = user.getName();
-                    String profile_pic = user.getBiggerProfileImageURL();
+                    String profile_pic = user.getBiggerProfileImageURLHttps();
                     String screen_name = user.getScreenName();
 
 

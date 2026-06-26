@@ -30,6 +30,7 @@ logout_back_stack_plan = 'docs/plans/2026-06-17-logout-back-stack-revocation.md'
 home_lifecycle_plan = 'docs/plans/2026-06-25-home-timeline-lifecycle.md'
 profile_image_design = 'docs/plans/2026-06-25-profile-image-lifecycle-design.md'
 profile_image_plan = 'docs/plans/2026-06-25-profile-image-lifecycle.md'
+secure_image_transport_plan = 'docs/plans/2026-06-26-https-image-transport.md'
 ci_workflow = '.github/workflows/check.yml'
 workflow_dir = '.github/workflows'
 codeowners = '.github/CODEOWNERS'
@@ -52,6 +53,16 @@ failures << "#{logout_back_stack_plan} is missing" unless File.exist?(logout_bac
 failures << "#{home_lifecycle_plan} is missing" unless File.exist?(home_lifecycle_plan)
 failures << "#{profile_image_design} is missing" unless File.exist?(profile_image_design)
 failures << "#{profile_image_plan} is missing" unless File.exist?(profile_image_plan)
+failures << "#{secure_image_transport_plan} is missing" unless File.exist?(secure_image_transport_plan)
+failures << 'SecureImageUrl.java is missing' unless File.exist?(
+  'app/src/main/java/com/example/app/SecureImageUrl.java'
+)
+failures << 'secure image URL behavior test is missing' unless File.exist?(
+  'scripts/test-secure-image-url.sh'
+)
+unless File.read('scripts/test-makefile-root.sh').include?('secure-image-url-test')
+  failures << 'Make root fixture must include the secure image URL behavior test'
+end
 failures << 'ProfileImagePublication.java is missing' unless File.exist?(
   'app/src/main/java/com/example/app/ProfileImagePublication.java'
 )
@@ -76,6 +87,9 @@ docs_plans.each do |plan_path|
 end
 
 makefile = File.read('Makefile')
+unless makefile.include?('/bin/sh "$$ROOT/scripts/test-secure-image-url.sh"')
+  failures << 'Makefile test gate must run the secure image URL behavior test'
+end
 root_declaration = %q(override ROOT := $(shell sed_path=/usr/bin/sed; [ -x "$$sed_path" ] || sed_path=/bin/sed; [ -x "$$sed_path" ] || exit 1; path=$$(printf '%s' '$(subst ','"'"',$(MAKEFILE_LIST))' | "$$sed_path" 's/^ //'); [ -f "$$path" ] || exit 1; directory=$${path%/*}; [ "$$directory" != "$$path" ] || directory=.; CDPATH= cd "$$directory" && pwd -P))
 root_assignments = makefile.lines.map(&:chomp).grep(/\A(?:override\s+)?ROOT\s*[:?+]?=/)
 required_make_authority = [
@@ -884,6 +898,43 @@ if File.exist?(home_activity_path)
   end
 else
   failures << "#{home_activity_path} is missing"
+end
+
+secure_image_url_path = 'app/src/main/java/com/example/app/SecureImageUrl.java'
+if File.exist?(secure_image_url_path)
+  secure_image_url_source = File.read(secure_image_url_path)
+  unless secure_image_url_source.include?('static URL parse(String value) throws IOException') &&
+         secure_image_url_source.include?('"https".equalsIgnoreCase(url.getProtocol())') &&
+         secure_image_url_source.include?('throw new IOException("Image URL must use HTTPS.");')
+    failures << "#{secure_image_url_path} must reject non-HTTPS image URLs"
+  end
+end
+
+unless main_activity_source.include?('user.getBiggerProfileImageURLHttps()') &&
+       home_activity_source.include?('status.getUser().getBiggerProfileImageURLHttps()')
+  failures << 'Twitter profile and timeline images must use the vendored HTTPS URL APIs'
+end
+if main_activity_source.include?('user.getBiggerProfileImageURL()') ||
+   home_activity_source.include?('status.getUser().getBiggerProfileImageURL()')
+  failures << 'cleartext-capable Twitter profile image URL APIs must not be restored'
+end
+unless image_loader_source.include?('HttpsURLConnection') &&
+       image_loader_source.include?('SecureImageUrl.parse(url)') &&
+       home_activity_source.include?('HttpsURLConnection') &&
+       home_activity_source.include?('SecureImageUrl.parse(urlString)')
+  failures << 'both image download paths must enforce HTTPS before opening connections'
+end
+
+secure_image_documents = {
+  'README.md' => 'Twitter profile and timeline images use HTTPS-only transport',
+  'SECURITY.md' => 'Twitter profile and timeline images use HTTPS-only transport',
+  'VISION.md' => 'Keep Twitter profile and timeline images on HTTPS-only transport',
+  'CHANGES.md' => 'HTTPS-only Twitter profile and timeline image transport'
+}
+secure_image_documents.each do |path, contract|
+  unless File.read(path).split.join(' ').include?(contract)
+    failures << "#{path} must document HTTPS-only image transport"
+  end
 end
 
 if failures.empty?

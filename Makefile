@@ -30,6 +30,7 @@ lint:
 	cd "$$ROOT" && $(RUBY) scripts/check_profile_image_lifecycle.rb
 
 test: lint
+	/bin/sh "$$ROOT/scripts/test-secure-image-url.sh"
 	/bin/sh "$$ROOT/scripts/test-timeline-publication.sh"
 	/bin/sh "$$ROOT/scripts/test-profile-image-publication.sh"
 	cd "$$ROOT" && $(RUBY) scripts/test-timeline-refresh-mutations.rb

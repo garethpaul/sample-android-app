@@ -48,6 +48,12 @@ printf '%s|%s|profile-image-publication-test\n' "$PWD" "$0" >> "$SAMPLE_ANDROID_
 EOF
 chmod +x "$CHECKOUT/scripts/test-profile-image-publication.sh"
 
+cat >"$CHECKOUT/scripts/test-secure-image-url.sh" <<'EOF'
+#!/bin/sh
+printf '%s|%s|secure-image-url-test\n' "$PWD" "$0" >> "$SAMPLE_ANDROID_COMMAND_LOG"
+EOF
+chmod +x "$CHECKOUT/scripts/test-secure-image-url.sh"
+
 BAD_COMMAND="$TEMP_ROOT/bad-command"
 cat >"$BAD_COMMAND" <<EOF
 #!/bin/sh
