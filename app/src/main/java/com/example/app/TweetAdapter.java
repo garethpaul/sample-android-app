@@ -61,6 +61,10 @@ public class TweetAdapter extends ArrayAdapter<Tweet>{
         return row;
     }
 
+    void close() {
+        imageLoader.shutdown();
+    }
+
     static class TweetHolder
     {
         TextView tweet;

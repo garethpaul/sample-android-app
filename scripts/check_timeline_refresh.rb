@@ -9,6 +9,8 @@ end
 failures = []
 home_path = 'app/src/main/java/com/example/app/HomeActivity.java'
 publication_path = 'app/src/main/java/com/example/app/TimelinePublication.java'
+adapter_path = 'app/src/main/java/com/example/app/TweetAdapter.java'
+image_loader_path = 'app/src/main/java/com/example/app/ImageLoader.java'
 
 unless File.exist?(home_path)
   failures << "#{home_path} is missing"
@@ -16,10 +18,23 @@ end
 unless File.exist?(publication_path)
   failures << "#{publication_path} is missing"
 end
+failures << "#{adapter_path} is missing" unless File.exist?(adapter_path)
+failures << "#{image_loader_path} is missing" unless File.exist?(image_loader_path)
 
 if failures.empty?
   home = source_without_comments(home_path)
   publication = source_without_comments(publication_path)
+  adapter = source_without_comments(adapter_path)
+  image_loader = source_without_comments(image_loader_path)
+
+  failures << 'HomeActivity must own one reusable timeline adapter' unless
+    home.match?(/private\s+TweetAdapter\s+tweetAdapter\s*;/)
+  failures << 'successful refreshes must create the adapter once and notify it thereafter' unless
+    home.match?(/if\s*\(\s*tweetAdapter\s*==\s*null\s*\).*?tweetAdapter\s*=\s*new\s+TweetAdapter.*?setAdapter\s*\(\s*tweetAdapter\s*\).*?else\s*\{.*?tweetAdapter\s*\.\s*notifyDataSetChanged\s*\(\s*\)/m)
+  failures << 'TweetAdapter teardown must shut down its image loader' unless
+    adapter.match?(/void\s+close\s*\(\s*\)\s*\{\s*imageLoader\s*\.\s*shutdown\s*\(\s*\)\s*;/m)
+  failures << 'ImageLoader teardown must stop queued workers and release view ownership' unless
+    image_loader.match?(/void\s+shutdown\s*\(\s*\)\s*\{.*?executorService\s*\.\s*shutdownNow\s*\(\s*\).*?imageViews\s*\.\s*clear\s*\(\s*\)/m)
 
   failures << 'timeline rows must not be appended directly to the displayed holder' if
     home.match?(/tweet_holder\s*\.\s*add\s*\(/)
@@ -35,7 +50,7 @@ if failures.empty?
     home.match?(/List<Status>\s+statuses\s*=\s*twitter\s*\.\s*getHomeTimeline\s*\(\s*paging\s*\)\s*;/)
   failures << 'timeline conversion must append only to task-local rows' unless
     home.match?(/fetchedTweets\s*\.\s*add\s*\(\s*new\s+Tweet\s*\(/)
-  completion = home.match(/boolean\s+successful\s*=\s*Boolean\.TRUE\.equals\s*\(\s*r\s*\)\s*;\s*if\s*\(\s*!timelinePublication\s*\.\s*publish\s*\(\s*revision\s*,\s*successful\s*,\s*fetchedTweets\s*\)\s*\)\s*\{\s*return\s*;\s*\}(.*?)if\s*\(\s*successful\s*\)\s*\{(.*?)lv\s*\.\s*setAdapter\s*\(\s*adapter\s*\)\s*;/m)
+  completion = home.match(/boolean\s+successful\s*=\s*Boolean\.TRUE\.equals\s*\(\s*r\s*\)\s*;\s*if\s*\(\s*!timelinePublication\s*\.\s*publish\s*\(\s*revision\s*,\s*successful\s*,\s*fetchedTweets\s*\)\s*\)\s*\{\s*return\s*;\s*\}(.*?)if\s*\(\s*successful\s*\)\s*\{(.*?)tweetAdapter\s*\.\s*notifyDataSetChanged\s*\(\s*\)\s*;/m)
   failures << 'loading and adapter changes must follow the same current-revision decision' unless completion
   if completion
     loading_updates = completion[1]
@@ -66,12 +81,15 @@ if failures.empty?
   if destroy
     destroy_body = destroy[:body]
     invalidate = destroy_body.index('timelinePublication.invalidate();')
+    adapter_guard = destroy_body.index('if (tweetAdapter != null)')
+    adapter_close = destroy_body.index('tweetAdapter.close();')
     null_guard = destroy_body.index('if (moPubView != null)')
     ad_destroy = destroy_body.index('moPubView.destroy();')
     super_destroy = destroy_body.index('super.onDestroy();')
     failures << 'Home teardown must invalidate timeline publication and destroy the initialized ad view' unless
-      invalidate && null_guard && ad_destroy && super_destroy &&
-      invalidate < null_guard && null_guard < ad_destroy && ad_destroy < super_destroy
+      invalidate && adapter_guard && adapter_close && null_guard && ad_destroy && super_destroy &&
+      invalidate < adapter_guard && adapter_guard < adapter_close && adapter_close < null_guard &&
+      null_guard < ad_destroy && ad_destroy < super_destroy
   else
     failures << 'HomeActivity must keep lifecycle teardown'
   end

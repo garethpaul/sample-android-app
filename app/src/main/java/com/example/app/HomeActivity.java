@@ -91,6 +91,7 @@ public class HomeActivity extends Activity {
     private ProgressBar progress;
     private MoPubView moPubView;
     private GetXMLTask profileImageTask;
+    private TweetAdapter tweetAdapter;
 
 
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)
@@ -251,10 +252,14 @@ public class HomeActivity extends Activity {
             loading.setVisibility(View.INVISIBLE);
 
             if (successful) {
-                TweetAdapter adapter = new TweetAdapter(HomeActivity.this, HomeActivity.this,
-                        R.layout.list, tweet_holder);
                 ListView lv = (ListView) findViewById(R.id.listView);
-                lv.setAdapter(adapter);
+                if (tweetAdapter == null) {
+                    tweetAdapter = new TweetAdapter(HomeActivity.this, HomeActivity.this,
+                            R.layout.list, tweet_holder);
+                    lv.setAdapter(tweetAdapter);
+                } else {
+                    tweetAdapter.notifyDataSetChanged();
+                }
             }
         }
 
@@ -264,6 +269,10 @@ public class HomeActivity extends Activity {
     protected void onDestroy() {
         timelinePublication.invalidate();
         invalidateProfileImageTask();
+        if (tweetAdapter != null) {
+            tweetAdapter.close();
+            tweetAdapter = null;
+        }
         if (moPubView != null) {
             moPubView.destroy();
         }
