@@ -103,7 +103,8 @@ secrets.
 - Successful logout must remove the authenticated Home activity from the back stack
   after credentials are cleared and login navigation starts.
 - Home teardown and successful logout invalidate pending timeline publications;
-  teardown also destroys the initialized ad view.
+  successful refreshes reuse one adapter, and teardown stops its image-loader
+  workers before destroying the initialized ad view.
 - Home teardown and successful logout invalidate pending profile image publications,
   cancel the active task, and reject stale UI completion. Profile image HTTP
   work uses finite connect/read timeouts and disconnects after stream cleanup.
@@ -193,6 +194,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   authenticated Home activity after successful logout.
 - See `docs/plans/2026-06-25-home-timeline-lifecycle.md` for timeline
   invalidation and Home ad teardown.
+- See `docs/plans/2026-06-26-timeline-image-loader-ownership.md` for reusable
+  adapter ownership and deterministic image-worker shutdown.
 - See `docs/plans/2026-06-25-profile-image-lifecycle.md` for profile image
   publication invalidation, cancellation, and bounded connection ownership.
 - See `docs/plans/2026-06-26-https-image-transport.md` for the shared image URL

@@ -253,4 +253,9 @@ public class ImageLoader {
         fileCache.clear();
     }
 
+    void shutdown() {
+        executorService.shutdownNow();
+        imageViews.clear();
+    }
+
 }

@@ -7,6 +7,8 @@ require 'tmpdir'
 root = File.expand_path('..', __dir__)
 home_path = 'app/src/main/java/com/example/app/HomeActivity.java'
 publication_path = 'app/src/main/java/com/example/app/TimelinePublication.java'
+adapter_path = 'app/src/main/java/com/example/app/TweetAdapter.java'
+image_loader_path = 'app/src/main/java/com/example/app/ImageLoader.java'
 checker_path = 'scripts/check_timeline_refresh.rb'
 
 mutations = {
@@ -38,6 +40,24 @@ mutations = {
   'teardown ad cleanup removed' => [home_path,
     'moPubView.destroy();',
     'moPubView.loadAd();'],
+  'adapter reuse removed' => [home_path,
+    'if (tweetAdapter == null) {',
+    'if (true) {'],
+  'adapter notification removed' => [home_path,
+    'tweetAdapter.notifyDataSetChanged();',
+    'tweetAdapter.getCount();'],
+  'adapter teardown removed' => [home_path,
+    'tweetAdapter.close();',
+    'tweetAdapter.notifyDataSetChanged();'],
+  'adapter loader shutdown removed' => [adapter_path,
+    'imageLoader.shutdown();',
+    'imageLoader.clearCache();'],
+  'loader workers retained' => [image_loader_path,
+    'executorService.shutdownNow();',
+    'executorService.isShutdown();'],
+  'loader view ownership retained' => [image_loader_path,
+    'imageViews.clear();',
+    'imageViews.size();'],
   'failed completion replaces rows' => [publication_path,
     'if (successful)',
     'if (true)'],
@@ -48,7 +68,7 @@ mutations = {
 
 mutations.each do |name, (path, before, after)|
   Dir.mktmpdir('sample-android-app-timeline-mutation') do |directory|
-    [home_path, publication_path, checker_path].each do |relative|
+    [home_path, publication_path, adapter_path, image_loader_path, checker_path].each do |relative|
       destination = File.join(directory, relative)
       FileUtils.mkdir_p(File.dirname(destination))
       FileUtils.cp(File.join(root, relative), destination)

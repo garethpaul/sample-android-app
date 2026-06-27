@@ -58,7 +58,8 @@ Helpful reports include:
 - Successful logout must remove the authenticated Home activity from the back stack
   so Back cannot reveal previously loaded account content.
 - Home teardown and successful logout invalidate pending timeline publications;
-  teardown also destroys the initialized ad view.
+  successful refreshes reuse one activity-owned adapter, and teardown stops its
+  image-loader workers before destroying the initialized ad view.
 - Home teardown and successful logout invalidate pending profile image publications,
   cancel the active task, reject stale UI completion, and bound HTTP retention
   with connect/read timeouts plus deterministic disconnect.

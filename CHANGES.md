@@ -1,5 +1,20 @@
 # Changes
 
+## 2026-06-26 20:46 PDT - P1 lifecycle - Own timeline image workers
+
+- Bug: every successful timeline refresh created another `TweetAdapter` and
+  five-thread `ImageLoader` pool without shutting the previous executor down.
+- Work: Home now owns one reusable adapter, notifies it after revision-safe row
+  replacement, and closes its loader before ad and Activity destruction.
+- RED: the source ownership contract rejected the missing adapter field, reuse,
+  notification, loader shutdown, and teardown ordering.
+- GREEN: the timeline checker and 20 hostile mutations cover adapter reuse,
+  worker shutdown, view-ownership release, existing revision safety, logout,
+  and ad teardown.
+- Blocker: the legacy Android SDK/Gradle application remains delegated to
+  hosted static/JDK verification; no emulator execution is claimed locally.
+- Next: require the full Make gate, CodeQL, and exact-head review before merge.
+
 ## 2026-06-26T12:20:00Z — P1 transport security — HTTPS image URLs
 
 - Cycle: inspected the clean Apache-licensed legacy Android sample after its

@@ -57,6 +57,8 @@
   cancel the active task, and keep its HTTP connection bounded and disconnected.
 - Twitter profile and timeline image URLs must use the HTTPS Twitter4J accessors
   and pass `SecureImageUrl` before opening a connection.
+- Home owns one reusable timeline adapter; teardown must stop its image-loader
+  executor before destroying the ad view and Activity.
 
 ## Agent workflow
 
